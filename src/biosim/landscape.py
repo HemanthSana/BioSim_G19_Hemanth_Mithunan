@@ -9,76 +9,133 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 class Landscape:
     """
-    Contains common attributes for other classes
+    Parent class for type of landscape
     """
-    def __init__(
-            self,
-            is_grazable,
-            is_migratable
-    ):
-        self.is_grazable = is_grazable
-        self.is_migratable = is_migratable
+    def __init__(self, rows, columns):
+        """
 
-
-class Ocean(Landscape):
-    """
-        This represents the cells covered by ocean
-    """
-    def __init__(
-            self,
-            is_grazable,
-            is_migratable
-    ):
-        super().__init__(is_grazable=False, is_migratable=False)
+        :param rows: row value of landscape
+        :param columns: column value of landscape
+        """
+        self.rows = rows
+        self.columns = columns
 
 
 class Jungle:
     """
-        This represents the cells covered by jungle
+        Represents landscape covered by jungle
     """
+    migratable = True
     fodder_max = 800
 
     def __init__(
             self,
-            is_grazable,
-            is_migratable
+            rows,
+            columns,
+            no_of_carn,
+            no_of_herb,
+            f_ij=fodder_max
     ):
-        super().__init__(is_grazable=True, is_migratable=True)
+        """
+
+        :param rows: Row value for Jungle cell
+        :param columns: Column value for jungle cell
+        :param no_of_carn: Number of carnivores in jungle cell
+        :param no_of_herb: Number of herbivores in jungle cell
+        :param f_ij: food in jungle cell
+        """
+        super().__init__(rows, columns)
+        self.no_of_carn = no_of_carn
+        self.no_of_herb = no_of_herb
+        self.f_ij = f_ij
 
 
 class Savannah:
     """
-    This represents the cells covered by savannah
+    Represents the landscape  covered by savannah
     """
+    migratable = True
     fodder_max = 300
 
     def __init__(
             self,
-            is_grazable,
-            is_migratable
+            rows,
+            columns,
+            no_of_carn,
+            no_of_herb,
+            f_ij=fodder_max,
+            alpha=0.3
     ):
-        super().__init__(is_grazable=True, is_migratable=True)
+        """
+
+        :param rows: Row value for Savannah Cell
+        :param columns: Column value for Savannah Cell
+        :param no_of_carn: No of Carnivores in Savannah cell
+        :param no_of_herb: No of Herbivores in Savannah cell
+        :param f_ij: Food in Savannah cell
+        :param alpha: constant for calculation
+        """
+        super().__init__(rows, columns)
+        self.no_of_carn = no_of_carn
+        self.no_of_herb = no_of_herb
+        self.f_ij = f_ij
+        self.alpha = alpha
 
 
 class Desert:
     """
-        This represents the cells covered by desert
+        Represents the landscape covered by desert
     """
+    migratable = False
+    fodder_max = 0
+
     def __init__(
             self,
-            is_grazable,
-            is_migratable
+            rows,
+            columns,
+            no_of_carn,
+            no_of_herb,
+            f_ij=fodder_max
     ):
-        super().__init__(is_grazable=False, is_migratable=True)
+        """
+
+        :param rows: Row value for Desert cell
+        :param columns: Column value for Desert cell
+        :param no_of_carn: Number of carnivores in Desert cell
+        :param no_of_herb: Number of Herbivores in Desert cell
+        :param f_ij: Fodder in Desert cell
+        """
+        super().__init__(rows, columns)
+        self.no_of_carn = no_of_carn
+        self.no_of_herb = no_of_herb
+        self.f_ij = f_ij
 
 
 class Mountain:
     """
-        This represents the cells covered by mountain
+        Represents the landscape covered by mountain
     """
-    def __init__(
-            self,
-            is_grazable,
-            is_migratable
-    ):
-        super().__init__(is_grazable=False, is_migratable=False)
+    migratable = False
+
+    def __init__(self, rows, columns):
+        """
+
+        :param rows: Row index for Mountain cell
+        :param columns: Column index for Mountain cell
+        """
+        super().__init__(rows, columns)
+
+
+class Ocean(Landscape):
+    """
+    Represents landscape covered by ocean
+    """
+    migratable = False
+
+    def __init__(self, rows, columns):
+        """
+
+        :param rows: Row index for Ocean cell
+        :param columns: Column index for Ocean cell
+        """
+        super().__init__(rows, columns)
