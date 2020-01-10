@@ -68,8 +68,8 @@ class Fauna:
 
     @property
     def death(self):
-        if self.fitness == 0:
             return True
+        if self.fitness == 0:
         else:
             prob_death = self.parameters['omega'] * (1 - self.fitness)
             if prob_death > np.random.random():
