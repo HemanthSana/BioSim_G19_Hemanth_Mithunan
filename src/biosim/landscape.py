@@ -9,140 +9,117 @@ __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 from biosim.fauna import Fauna
+from biosim.fauna import Herbivore
+from biosim.fauna import Carnivore
 
 
 class Landscape:
     """
     Parent class for type of landscape
     """
-    def __init__(self, rows, columns):
+    def __init__(self, animals_list):
         """
 
-        :param rows: row value of landscape
-        :param columns: column value of landscape
+        :param animals_list: list of animals in the cell
         """
-        self.rows = rows
-        self.columns = columns
+        self.fauna_list = animals_list
+        self.remaining_fodder = 0
+
+    def update_fodder(self):
+        # each time herbivore eats available fodder should be calculated
+        consumed_fodder = 0
+        required_fodder = Herbivore(cell).parameters['F']
+
+        if required_fodder <= self.available_fodder:
+            consumed_fodder = required_fodder
+            self.remaining_fodder = self.remaining_fodder - required_fodder
+        else:
+            consumed_fodder = self.available_fodder
+            self.remaining_fodder = 0
+
+        return consumed_fodder, self.remaining_fodder
+
+    @property
+    def available_fodder(self):
+        return self.remaining_fodder
 
 
 class Jungle(Landscape):
     """
-        Represents landscape covered by jungle
+        Represents landscape covered by jungle cells
+        There is no risk of over grazing
+        Every year available fodder is maximum fodder(f_max)
     """
-    migratable = True
-    fodder_max = 800
+    is_migratable = True
 
-    def __init__(
-            self,
-            rows,
-            columns,
-            no_of_carn,
-            no_of_herb,
-            f_ij=fodder_max
-    ):
-        """
+    def __init__(self, animals_list):
+        # child class of Landscape
+        super().__init__(animals_list)
+        self.f_max = 800
 
-        :param rows: Row value for Jungle cell
-        :param columns: Column value for jungle cell
-        :param no_of_carn: Number of carnivores in jungle cell
-        :param no_of_herb: Number of herbivores in jungle cell
-        :param f_ij: food in jungle cell
-        """
-        super().__init__(rows, columns)
-        self.no_of_carn = no_of_carn
-        self.no_of_herb = no_of_herb
-        self.f_ij = f_ij
+        # At the start amount of fodder is maximum available
+        self.remaining_fodder = self.f_max
+
+    def update_annual_fodder(self):
+        # There is no overgrazing in jungle cells
+        self.remaining_fodder = self.f_max
 
 
 class Savannah(Landscape):
     """
-    Represents the landscape  covered by savannah
+    Represents the landscape  covered by savannah cells
+    Here there is risk of over grazing
+    Every year available folder in each cell is calculated manually
     """
-    migratable = True
-    fodder_max = 300
+    is_migratable = True
 
-    def __init__(
-            self,
-            rows,
-            columns,
-            no_of_carn,
-            no_of_herb,
-            f_ij=fodder_max,
-            alpha=0.3
-    ):
-        """
+    def __init__(self, animals_list):
+        # child class of Landscape
+        super().__init__(animals_list)
+        self.f_max = 300
+        self.alpha = 0.3
 
-        :param rows: Row value for Savannah Cell
-        :param columns: Column value for Savannah Cell
-        :param no_of_carn: No of Carnivores in Savannah cell
-        :param no_of_herb: No of Herbivores in Savannah cell
-        :param f_ij: Food in Savannah cell
-        :param alpha: constant for calculation
-        """
-        super().__init__(rows, columns)
-        self.no_of_carn = no_of_carn
-        self.no_of_herb = no_of_herb
-        self.f_ij = f_ij
-        self.alpha = alpha
+        # At the start amount of fodder is maximum available
+        self.remaining_fodder = self.f_max
+
+    def update_annual_fodder(self):
+        self.remaining_fodder += self.alpha * \
+                                 (self.f_max - self.remaining_fodder)
 
 
 class Desert(Landscape):
     """
-        Represents the landscape covered by desert
+        Represents the landscape covered by desert cells
+        In these cells animals can migrate but there is no fodder available
     """
-    migratable = False
-    fodder_max = 0
+    is_migratable = True
 
-    def __init__(
-            self,
-            rows,
-            columns,
-            no_of_carn,
-            no_of_herb,
-            f_ij=fodder_max
-    ):
-        """
-
-        :param rows: Row value for Desert cell
-        :param columns: Column value for Desert cell
-        :param no_of_carn: Number of carnivores in Desert cell
-        :param no_of_herb: Number of Herbivores in Desert cell
-        :param f_ij: Fodder in Desert cell
-        """
-        super().__init__(rows, columns)
-        self.no_of_carn = no_of_carn
-        self.no_of_herb = no_of_herb
-        self.f_ij = f_ij
+    def __init__(self, animals_list):
+        # child class of Landscape
+        super().__init__(animals_list)
+        self.f_max = 0
+        self.remaining_fodder = self.f_max
 
 
 class Mountain(Landscape):
     """
-        Represents the landscape covered by mountain
+        Represents the landscape covered by mountain cells
+        In these cells animals cannot migrate and there is no fodder
     """
-    migratable = False
+    is_migratable = False
 
-    def __init__(self, rows, columns):
-        """
-
-        :param rows: Row index for Mountain cell
-        :param columns: Column index for Mountain cell
-        """
-        super().__init__(rows, columns)
+    def __init__(self, animals_list):
+        # child class of Landscape
+        super().__init__(animals_list)
 
 
 class Ocean(Landscape):
     """
-    Represents landscape covered by ocean
+    Represents landscape covered by ocean cells
+    In these cells animals cannot migrate and there is no fodder
     """
-    migratable = False
+    is_migratable = False
 
-    def __init__(self, rows, columns):
-        """
-
-        :param rows: Row index for Ocean cell
-        :param columns: Column index for Ocean cell
-        """
-        super().__init__(rows, columns)
-
-
-
+    def __init__(self, animals_list):
+        # child class of Landscape
+        super().__init__(animals_list)
