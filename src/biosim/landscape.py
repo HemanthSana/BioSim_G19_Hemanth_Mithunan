@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
 """
+Contains Data of each cell, fodder functions and
+animal list in each cell
 """
 
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
+
+from biosim.fauna import Fauna
 
 
 class Landscape:
@@ -21,7 +25,7 @@ class Landscape:
         self.columns = columns
 
 
-class Jungle:
+class Jungle(Landscape):
     """
         Represents landscape covered by jungle
     """
@@ -50,7 +54,7 @@ class Jungle:
         self.f_ij = f_ij
 
 
-class Savannah:
+class Savannah(Landscape):
     """
     Represents the landscape  covered by savannah
     """
@@ -82,7 +86,7 @@ class Savannah:
         self.alpha = alpha
 
 
-class Desert:
+class Desert(Landscape):
     """
         Represents the landscape covered by desert
     """
@@ -111,7 +115,7 @@ class Desert:
         self.f_ij = f_ij
 
 
-class Mountain:
+class Mountain(Landscape):
     """
         Represents the landscape covered by mountain
     """
@@ -139,3 +143,6 @@ class Ocean(Landscape):
         :param columns: Column index for Ocean cell
         """
         super().__init__(rows, columns)
+
+
+
