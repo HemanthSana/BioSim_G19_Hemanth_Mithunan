@@ -6,8 +6,8 @@ It returns a numpy array with cell information
 equal to no of characters in the given string
 """
 
-author = "Hemanth Sana & Mithunan Sivagnanam"
-email = "hesa@nmbu.no & misi@nmbu.no"
+__author__ = "Hemanth Sana & Mithunan Sivagnanam"
+__email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 from biosim.landscape import *
 import numpy as np

@@ -2,21 +2,28 @@
 
 """
 """
-author = "Hemanth Sana & Mithunan Sivagnanam"
-email = "hesa@nmbu.no & misi@nmbu.no"
+__author__ = "Hemanth Sana & Mithunan Sivagnanam"
+__email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import math
 import numpy as np
 
 
 class Fauna:
-    w_birth = None
-
     def __init__(self, cell):
         self.cell = cell
         self.age = 0
         self.weight = None
         self.parameters = None
+
+    @property
+    def aging(self):
+        """
+
+        :return: Ages the animal
+        """
+        self.age += 1
+        return self.age
 
     @property
     def weight(self):
@@ -39,6 +46,10 @@ class Fauna:
         eta = self.parameters['eta']
         self.weight -= eta * self.weight
 
+    def change_in_weight(self):
+        self.weight = self.weight + self.increase_weight - \
+                      self.decrease_weight()
+
     @property
     def fitness(self):
         if self.weight > 0:
@@ -55,7 +66,7 @@ class Fauna:
     def migration(self):
         pass
 
-    def birth(self, num_animals):
+    def check_birth(self, num_animals):
         if self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
             prob_birth = min(1,
@@ -65,6 +76,9 @@ class Fauna:
             prob_birth = 0
 
         return prob_birth > np.random.random()
+
+    def birth(self):
+        pass
 
     @property
     def death(self):
@@ -96,4 +110,5 @@ class Herbivore(Fauna):
                            'xi': 1.2, 'omega': 0.4, 'F': 10.0}
 
         if self.weight is None:
-            self.weight = np.random.normal(self.parameters['w_birth'], self.parameters['sigma_birth'])
+            self.weight = np.random.normal(self.parameters['w_birth'],
+                                           self.parameters['sigma_birth'])
