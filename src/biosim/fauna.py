@@ -10,16 +10,12 @@ import numpy as np
 
 
 class Fauna:
-    def __init__(self, cell):
-        """
-
-        :param cell: We get this from landscape and put new animals
-        """
-        self.cell = cell
+    def __init__(self):
         # At the start age is zero
         self.age = 0
         self.weight = None
         self.parameters = None
+        self.fitness = None
 
     @property
     def weight(self):
@@ -48,8 +44,14 @@ class Fauna:
         self.age += 1
         self.decrease_weight(self.parameters['eta'])
 
+    def animal_eats(self, fodder_eaten):
+        self.weight += self.parameters['beta'] * fodder_eaten
+
+    def animal_dies(self):
+        pass
+
     @property
-    def fitness(self):
+    def animal_fitness(self):
         if self.weight > 0:
             q_age = 1 / (1 + math.e ** (self.parameters['phi_age'] *
                                         (self.age -
@@ -61,41 +63,27 @@ class Fauna:
         else:
             return 0
 
-    def migration(self):
-        pass
-
-    def animal_gives_birth(self, num_animals):
-        num_animals = self.cell.num
+    @property
+    def probability_of_birth(self):
+        num_animals = self.num_animals
         if self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
-            prob_birth = min(1,
-                             self.parameters['gamma'] * self.fitness *
+            return min(1, self.parameters['gamma'] * self.fitness *
                              (num_animals - 1))
         else:
-            prob_birth = 0
-
-        # if prob_birth > np.random.random():
-        #    return self.__class__()
-        return prob_birth > np.random.random()
-
-    # def changes_after_birth(self):
-    #     if self.animal_gives_birth:
-    #         self.num_animals += 1
-    #         self.decrease_weight(self.parameters['xi'])
+            return 0
 
     @property
-    def check_animal_dies(self):
+    def probability_of_death(self):
         if self.fitness == 0:
-            return True
+            return 1
         else:
-            prob_death = self.parameters['omega'] * (1 - self.fitness)
-            if prob_death > np.random.random():
-                return True
+            return self.weight * (1 - self.fitness)
 
 
 class Carnivore(Fauna):
-    def __init__(self, cell):
-        super().__init__(cell)
+    def __init__(self):
+        super().__init__()
         self.parameters = {'w_birth': 6.0, 'sigma_birth': 1.0, 'beta': 0.75,
                            'eta': 0.125, 'a_half': 60.0, 'phi_age': 0.4,
                            'w_half': 4.0, 'phi_weight': 0.4, 'mu': 0.4,
@@ -108,8 +96,8 @@ class Carnivore(Fauna):
 
 
 class Herbivore(Fauna):
-    def __init__(self, cell):
-        super().__init__(cell)
+    def __init__(self):
+        super().__init__()
         self.parameters = {'w_birth': 8.0, 'sigma_birth': 1.5, 'beta': 0.9,
                            'eta': 0.05, 'a_half': 40.0, 'phi_age': 0.2,
                            'w_half': 10.0, 'phi_weight': 0.1, 'mu': 0.25,

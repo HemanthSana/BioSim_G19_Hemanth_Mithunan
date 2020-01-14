@@ -18,7 +18,7 @@ class Island:
     Type of cell in island can be O for Ocean, S for Savannah,
     M for Mountain, J for Jungle, D for Desert
     """
-    def __init__(self, geo_multiline_string):
+    def __init__(self, geo_multiline_string, fauna_instance):
         """
 
         :param geo_multiline_string: Multiline String with characters
@@ -32,6 +32,7 @@ class Island:
 
         self.island_object_dict = {'O': Ocean, 'M': Mountain, 'D': Desert,
                                    'S': Savannah, 'J': Jungle}
+        self.fauna_instance = fauna_instance
 
     def get_array_from_string(self):
         # cleaning to avoid garbage data
@@ -52,7 +53,8 @@ class Island:
                 # maps the char to class object to know which cell
                 cell_type = self.island_object_dict[geo_array[rows][columns]]
                 # instantiate the object of respective classes in the array
-                geo_cell_type_array[rows][columns] = cell_type()
+                geo_cell_type_array[rows][columns] = cell_type(
+                    self.fauna_instance)
 
         return geo_cell_type_array
 
