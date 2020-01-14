@@ -14,6 +14,7 @@ from biosim.fauna import Carnivore
 
 import math
 import operator
+import numpy as np
 
 
 class Landscape:
@@ -45,6 +46,21 @@ class Landscape:
             self.sorted_animal_fitness[species] = dict(
                 sorted(self.sorted_animal_fitness[species].items(),
                        key=operator.itemgetter(1)))
+
+    def give_birth(self, animal):
+        if len(self.fauna_list[animal.__class__.__name__]) >= 2:
+            if np.random.random() > animal.probability_of_birth:
+                baby_animal = animal.__class__.__name__()
+                if animal.weight < (baby_animal.weight *
+                                    baby_animal.parameters['xi']):
+                    self.add_animal(baby_animal)
+                    animal.weight -= baby_animal * baby_animal.parameters['xi']
+
+    def add_animal(self, animal):
+        self.fauna_list[animal.__class__.__name__].append(animal)
+
+    def remove_animal(self, animal):
+        pass
 
     def food_type(self, species):
         if species == 'Herbivore':
