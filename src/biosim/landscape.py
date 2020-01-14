@@ -51,7 +51,7 @@ class Landscape:
         if len(self.fauna_list[animal.__class__.__name__]) >= 2:
             if np.random.random() > animal.probability_of_birth:
                 baby_animal = animal.__class__.__name__()
-                if animal.weight < (baby_animal.weight *
+                if animal.weight > (baby_animal.weight *
                                     baby_animal.parameters['xi']):
                     self.add_animal(baby_animal)
                     animal.weight -= baby_animal * baby_animal.parameters['xi']
@@ -60,7 +60,7 @@ class Landscape:
         self.fauna_list[animal.__class__.__name__].append(animal)
 
     def remove_animal(self, animal):
-        pass
+        self.fauna_list[animal.__class__.__name__].remove(animal)
 
     def food_type(self, species):
         if species == 'Herbivore':
@@ -85,29 +85,16 @@ class Landscape:
     def move_probability(self):
         pass
 
-    def update_fodder(self):
-        # each time herbivore eats available fodder should be calculated
-        consumed_fodder = 0
-        required_fodder = Herbivore().parameters['F']
-
-        if required_fodder <= self.available_fodder:
-            consumed_fodder = required_fodder
-            self.remaining_fodder = self.remaining_fodder - required_fodder
-        else:
-            consumed_fodder = self.available_fodder
-            self.remaining_fodder = 0
-
-        return consumed_fodder, self.remaining_fodder
-
-    @property
-    def available_fodder(self):
-        return self.remaining_fodder
-
-    def add_animals(self):
-        pass
-
-    def remove_animals(self):
-        pass
+    def herbivore_eats(self):
+        self.order_by_fitness(self.fauna_list, 'Herbivore')
+        for herb in self.sorted_animal_fitness['Herbivore']:
+            if self.remaining_fodder == 0:
+                break
+            elif self.remaining_fodder >= herb.parameters['F']:
+                herb.animal_eats(herb.parameters['F'])
+            elif 0 < self.remaining_fodder < herb.parameters['F']:
+                herb.animal_eats(self.remaining_fodder)
+                self.remaining_fodder = 0
 
 
 class Jungle(Landscape):
