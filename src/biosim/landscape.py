@@ -12,6 +12,7 @@ from biosim.fauna import Fauna
 from biosim.fauna import Herbivore
 from biosim.fauna import Carnivore
 
+import operator
 
 class Landscape:
     """
@@ -22,8 +23,27 @@ class Landscape:
 
         :param animals_list: list of animals in the cell
         """
+        self.sorted_animal_fitness = {}
         self.fauna_list = animals_list
         self.remaining_fodder = 0
+
+    def save_fitness(self, animals, species):
+        animal_fitness = {}
+        for animal in animals[species]:
+            animal_fitness[animal] = animal.fitness
+        self.sorted_animal_fitness[species] = animal_fitness
+
+    def order_by_fitness(self, to_sort_objects, species, reverse=True):
+        self.save_fitness(to_sort_objects, species)
+        if reverse:
+            self.sorted_animal_fitness[species] = dict(
+                sorted(self.sorted_animal_fitness[species].items(),
+                       key=operator.itemgetter(1), reverse=True))
+        else:
+            self.sorted_animal_fitness[species] = dict(
+                sorted(self.sorted_animal_fitness[species].items(),
+                       key=operator.itemgetter(1)))
+        
 
     def update_fodder(self):
         # each time herbivore eats available fodder should be calculated
