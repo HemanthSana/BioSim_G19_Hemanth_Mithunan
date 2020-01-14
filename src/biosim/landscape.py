@@ -12,7 +12,9 @@ from biosim.fauna import Fauna
 from biosim.fauna import Herbivore
 from biosim.fauna import Carnivore
 
+import math
 import operator
+
 
 class Landscape:
     """
@@ -43,12 +45,34 @@ class Landscape:
             self.sorted_animal_fitness[species] = dict(
                 sorted(self.sorted_animal_fitness[species].items(),
                        key=operator.itemgetter(1)))
-        
+
+    def food_type(self, species):
+        if species == 'Herbivore':
+            return self.remaining_fodder
+        elif species == 'Carnivore':
+            herbivore_weight_total = 0
+            for herb in self.fauna_list['Herbivore']:
+                herbivore_weight_total += herb.weight
+            return herbivore_weight_total
+
+    def relative_abundance_fodder(self, species):
+        return self.food_type(species) / ((len(self.fauna_list[species]) + 1)
+                                          * species.parameters['F'])
+
+    def move_propensity(self, dest, species):
+        if dest == 'Mountain' or 'Ocean':
+            return 0
+        else:
+            return math.exp(species.parameters['lambda'] *
+                            self.relative_abundance_fodder(species))
+
+    def move_probability(self):
+        pass
 
     def update_fodder(self):
         # each time herbivore eats available fodder should be calculated
         consumed_fodder = 0
-        required_fodder = Herbivore(cell).parameters['F']
+        required_fodder = Herbivore().parameters['F']
 
         if required_fodder <= self.available_fodder:
             consumed_fodder = required_fodder
@@ -62,6 +86,12 @@ class Landscape:
     @property
     def available_fodder(self):
         return self.remaining_fodder
+
+    def add_animals(self):
+        pass
+
+    def remove_animals(self):
+        pass
 
 
 class Jungle(Landscape):
