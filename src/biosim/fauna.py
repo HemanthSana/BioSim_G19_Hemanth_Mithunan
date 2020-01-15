@@ -15,7 +15,6 @@ class Fauna:
         self.age = 0
         self.weight = None
         self.parameters = None
-        self.fitness = None
 
     @property
     def weight(self):
@@ -64,21 +63,25 @@ class Fauna:
             return 0
 
     @property
+    def probability_of_move(self):
+        return self.parameters['mu'] * self.animal_fitness
+
+    @property
     def probability_of_birth(self):
         num_animals = self.num_animals
         if self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
-            return min(1, self.parameters['gamma'] * self.fitness *
+            return min(1, self.parameters['gamma'] * self.animal_fitness *
                              (num_animals - 1))
         else:
             return 0
 
     @property
     def probability_of_death(self):
-        if self.fitness == 0:
+        if self.animal_fitness == 0:
             return 1
         else:
-            return self.weight * (1 - self.fitness)
+            return self.weight * (1 - self.animal_fitness)
 
 
 class Carnivore(Fauna):
