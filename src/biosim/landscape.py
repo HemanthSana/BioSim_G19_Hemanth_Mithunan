@@ -75,15 +75,18 @@ class Landscape:
         return self.food_type(species) / ((len(self.fauna_list[species]) + 1)
                                           * species.parameters['F'])
 
-    def move_propensity(self, dest, species):
-        if dest == 'Mountain' or 'Ocean':
+    def move_propensity(self, dest_cell, species):
+        if dest_cell == 'Mountain' or 'Ocean':
             return 0
         else:
             return math.exp(species.parameters['lambda'] *
                             self.relative_abundance_fodder(species))
 
-    def move_probability(self):
-        pass
+    def move_probability(self, dest_cell, adj_cells, species):
+        propensity_sum = 0
+        for cell in adj_cells:
+            propensity_sum += self.move_propensity(dest_cell, species)
+        return self.move_propensity(dest_cell, species)/propensity_sum
 
     def herbivore_eats(self):
         self.order_by_fitness(self.fauna_list, 'Herbivore')
