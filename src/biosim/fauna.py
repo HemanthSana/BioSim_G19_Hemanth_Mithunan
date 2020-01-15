@@ -44,8 +44,8 @@ class Fauna:
         self.age += 1
         self.decrease_weight(self.parameters['eta'])
 
-    def animal_eats(self, fodder_eaten):
-        self.weight += self.parameters['beta'] * fodder_eaten
+    def animal_eats(self, food_eaten):
+        self.weight += self.parameters['beta'] * food_eaten
 
     def animal_dies(self):
         pass
@@ -88,11 +88,20 @@ class Carnivore(Fauna):
                            'eta': 0.125, 'a_half': 60.0, 'phi_age': 0.4,
                            'w_half': 4.0, 'phi_weight': 0.4, 'mu': 0.4,
                            'lambda': 1.0, 'gamma': 0.8, 'zeta': 3.5,
-                           'xi': 1.1, 'omega': 0.9, 'F': 50.0}
+                           'xi': 1.1, 'omega': 0.9, 'F': 50.0,
+                           'DeltaPhiMax' : 10.0}
 
         if self.weight is None:
             self.weight = np.random.normal(self.parameters['w_birth'],
                                            self.parameters['sigma_birth'])
+
+    def probability_of_kill(self, herb):
+        if self.fitness <= herb.fitness:
+            return 0
+        elif 0 < self.fitness - herb < self.parameters['DeltaPhiMax']:
+            return (self.fitness - herb.fitness)/self.parameters['DeltaPhiMax']
+        else:
+            return 1
 
 
 class Herbivore(Fauna):

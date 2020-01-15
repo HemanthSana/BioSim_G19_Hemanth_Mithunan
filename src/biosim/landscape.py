@@ -96,6 +96,18 @@ class Landscape:
                 herb.animal_eats(self.remaining_fodder)
                 self.remaining_fodder = 0
 
+    def carnivore_eats(self):
+        self.order_by_fitness(self.fauna_list, 'Carnivore')
+        self.order_by_fitness(self.fauna_list, 'Herbivore', False)
+        for carn in self.sorted_animal_fitness['Carnivore']:
+            if len(self.sorted_animal_fitness['Herbivore']) > 0:
+                for herb in self.sorted_animal_fitness['Herbivore']:
+                    if np.random.random() > carn.probability_of_kill(herb):
+                        if herb.weight >= carn.parameters['F']:
+                            carn.animal_eats(carn.parameters['F'])
+                        else:
+                            carn.animal_eats(herb.weight)
+
 
 class Jungle(Landscape):
     """
