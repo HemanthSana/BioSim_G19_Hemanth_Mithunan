@@ -59,6 +59,29 @@ class Island:
         return geo_cell_type_array
 
 
+    def migrate(self):
+        island_array = self.get_array_from_string()
+        horizontal = island_array[0]
+        vertical = island_array[1]
+        for x_cord in range(horizontal):
+            for y_cord in range(vertical):
+                current_cell = island_array[x_cord, y_cord]
+                for animal in current_cell.animal_list:
+                    if np.random.random() > animal.probability_of_move:
+                        adj_cells = [island_array[x_cord - 1, y_cord],
+                                        island_array[x_cord + 1, y_cord],
+                                        island_array[x_cord, y_cord - 1],
+                                        island_array[x_cord, y_cord + 1]]
+                        list_of_probabilities = [
+                            current_cell.move_probability
+                            (cell, adj_cells, animal)
+                            for cell in adj_cells]
+                        max_probable_index = list_of_probabilities.index(
+                            max(list_of_probabilities))
+                        max_probable_cell = adj_cells[max_probable_index]
+
+                        current_cell.remove_animal(animal)
+                        max_probable_cell.add_animal(animal)
 
 
 
