@@ -10,6 +10,8 @@ import numpy as np
 
 
 class Fauna:
+    # parameters = {}
+
     def __init__(self):
         # At the start age is zero
         self.age = 0
@@ -20,12 +22,8 @@ class Fauna:
         # animal = {Herbivore, Carnivore}
 
     @property
-    def weight(self):
+    def animal_weight(self):
         return self.weight
-
-    @weight.setter
-    def weight(self, value):
-        self.weight = value
 
     def increase_weight(self, fodder_eaten):
         """
@@ -36,7 +34,12 @@ class Fauna:
         beta = self.parameters['beta']
         self.weight += beta * fodder_eaten
 
-    def decrease_weight(self, const):
+    def decrease_animal_weight(self, const):
+        """
+
+        :param const: factor by which weight decreases every year(eta)
+        :return: Reduced weight
+        """
         self.weight -= const * self.weight
 
     def animal_grows(self):
@@ -44,13 +47,10 @@ class Fauna:
         age increases by one and weight decreases by a factor of eta annually
         """
         self.age += 1
-        self.decrease_weight(self.parameters['eta'])
+        self.decrease_animal_weight(self.parameters['eta'])
 
     def animal_eats(self, food_eaten):
         self.weight += self.parameters['beta'] * food_eaten
-
-    def animal_dies(self):
-        pass
 
     @property
     def animal_fitness(self):
@@ -102,7 +102,7 @@ class Carnivore(Fauna):
                   'xi': 1.1, 'omega': 0.9, 'F': 50.0,
                   'DeltaPhiMax': 10.0}
 
-    def __init__(self, given_params):
+    def __init__(self, given_params=None):
         super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
@@ -128,11 +128,11 @@ class Herbivore(Fauna):
                   'lambda': 1.0, 'gamma': 0.2, 'zeta': 3.5,
                   'xi': 1.2, 'omega': 0.4, 'F': 10.0}
 
-    def __init__(self, given_params):
+    def __init__(self, given_params=None):
         super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
-        self.parameters = Herbivore.parameters
+            self.parameters = Herbivore.parameters
 
         if self.weight is None:
             self.weight = np.random.normal(self.parameters['w_birth'],

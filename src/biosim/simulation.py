@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
+Simulates the whole project
 """
 
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"

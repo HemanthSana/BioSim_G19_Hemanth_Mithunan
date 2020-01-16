@@ -58,7 +58,7 @@ class Island:
 
         return geo_cell_type_array
 
-    def migrate(self):
+    def animal_migrates(self):
         island_array = self.get_array_from_string()
         horizontal = island_array[0]
         vertical = island_array[1]
