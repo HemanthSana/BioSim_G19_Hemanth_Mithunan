@@ -6,6 +6,8 @@
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
+import numpy as np
+
 
 class BioSim:
     def __init__(
@@ -41,6 +43,16 @@ class BioSim:
         where img_no are consecutive image numbers starting from 0.
         img_base should contain a path and beginning of a file name.
         """
+        self.island_map = island_map
+        self.ini_pop = ini_pop
+        np.random.seed(seed)
+        self.ymax_animals = ymax_animals
+        self.cmax_animals = cmax_animals
+        self.img_base = img_base
+        self.img_fmt = img_fmt
+        self.animal_params = {'Herbivore': {}, 'Carnivore': {}}
+        self.landscape_params = {'J': {}, 'S': {}, 'D': {}, 'M': {}, 'O': {}}
+        self.last_year = 0
 
     def set_animal_parameters(self, species, params):
         """
@@ -49,6 +61,8 @@ class BioSim:
         :param species: String, name of animal species
         :param params: Dict with valid parameter specification for species
         """
+        for param in params:
+            self.animal_params[species][param] = params[param]
 
     def set_landscape_parameters(self, landscape, params):
         """
@@ -57,6 +71,8 @@ class BioSim:
         :param landscape: String, code letter for landscape
         :param params: Dict with valid parameter specification for landscape
         """
+        for param in params:
+            self.animal_params[landscape][param] = params[param]
 
     def simulate(self, num_years, vis_years=1, img_years=None):
         """
@@ -68,6 +84,7 @@ class BioSim:
 
         Image files will be numbered consecutively.
         """
+        pass
 
     def add_population(self, population):
         """
@@ -75,22 +92,37 @@ class BioSim:
 
         :param population: List of dictionaries specifying population
         """
+        self.ini_pop.append(population[0])
 
     @property
     def year(self):
         """Last year simulated."""
+        return self.last_year
 
     @property
     def num_animals(self):
         """Total number of animals on island."""
+        animal_count = 0
+        for animal in self.ini_pop:
+            animal_count += len(animal['pop'])
+            return animal_count
 
     @property
     def num_animals_per_species(self):
         """Number of animals per species in island, as dictionary."""
+        animal_count_dict = {'Herbivore': 0, 'Carnivore': 0}
+        for animal in self.ini_pop:
+            if animal['pop'][0]['species'] == 'Herbivore':
+                animal_count_dict['Herbivore'] += len(animal['pop'])
+            elif animal['pop'][0]['species'] == 'Carnivore':
+                animal_count_dict['Carnivore'] += len(animal['pop'])
+        return animal_count_dict
 
     @property
     def animal_distribution(self):
         """Pandas DataFrame with animal count per species for each cell on island."""
+        pass
+
 
     def make_movie(self):
         """Create MPEG4 movie from visualization images saved."""

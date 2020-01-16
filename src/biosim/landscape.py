@@ -21,6 +21,8 @@ class Landscape:
     """
     Parent class for type of landscape
     """
+    parameters = {}
+
     def __init__(self, animals_list):
         """
 
@@ -48,13 +50,13 @@ class Landscape:
                        key=operator.itemgetter(1)))
 
     def give_birth(self, animal):
-        if len(self.fauna_list[animal.__class__.__name__]) >= 2:
-            if np.random.random() > animal.probability_of_birth:
-                baby_animal = animal.__class__.__name__()
-                if animal.weight > (baby_animal.weight *
-                                    baby_animal.parameters['xi']):
-                    self.add_animal(baby_animal)
-                    animal.weight -= baby_animal * baby_animal.parameters['xi']
+        num_animals = len(self.fauna_list[animal.__class__.__name__])
+        if np.random.random() > animal.probability_of_birth(num_animals):
+            baby_animal = animal.__class__.__name__()
+            if animal.weight > (baby_animal.weight *
+                                baby_animal.parameters['xi']):
+                self.add_animal(baby_animal)
+                animal.weight -= baby_animal * baby_animal.parameters['xi']
 
     def add_animal(self, animal):
         self.fauna_list[animal.__class__.__name__].append(animal)
@@ -119,14 +121,15 @@ class Jungle(Landscape):
         Every year available fodder is maximum fodder(f_max)
     """
     is_migratable = True
+    parameters = {'f_max': 800.0}
 
-    def __init__(self, animals_list):
+    def __init__(self, animals_list, given_params):
         # child class of Landscape
         super().__init__(animals_list)
-        self.f_max = 800
-
-        # At the start amount of fodder is maximum available
-        self.remaining_fodder = self.f_max
+        if given_params is not None:
+            Fauna.set_parameters(given_params)
+            self.parameters = Jungle.parameters
+            self.remaining_fodder = self.parameters['f_max']
 
     def update_annual_fodder(self):
         # There is no overgrazing in jungle cells
