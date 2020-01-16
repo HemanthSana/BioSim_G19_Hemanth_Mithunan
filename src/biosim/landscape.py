@@ -84,7 +84,7 @@ class Landscape:
 
     def move_probability(self, dest_cell, adj_cells, species):
         propensity_sum = 0
-        for cell in adj_cells:
+        for _ in adj_cells:
             propensity_sum += self.move_propensity(dest_cell, species)
         return self.move_propensity(dest_cell, species)/propensity_sum
 
