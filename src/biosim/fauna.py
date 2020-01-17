@@ -16,7 +16,7 @@ class Fauna:
         # At the start age is zero
         self.age = 0
         self.weight = None
-        self.parameters = None
+        self.parameters = {}
         self.fitness = 0
         self.given_params = None
         # animal = {Herbivore, Carnivore}
@@ -84,15 +84,6 @@ class Fauna:
         else:
             return self.weight * (1 - self.animal_fitness)
 
-    @staticmethod
-    def set_parameters(given_params):
-        for param in given_params:
-            if param in __class__.__name__.parameters:
-                __class__.__name__.parameters[param] = \
-                    given_params.parameters[param]
-            else:
-                raise ValueError('Parameter not in list' + str(param))
-
 
 class Carnivore(Fauna):
     parameters = {'w_birth': 6.0, 'sigma_birth': 1.0, 'beta': 0.75,
@@ -102,7 +93,7 @@ class Carnivore(Fauna):
                   'xi': 1.1, 'omega': 0.9, 'F': 50.0,
                   'DeltaPhiMax': 10.0}
 
-    def __init__(self, given_params=None):
+    def __init__(self, given_params):
         super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
@@ -120,6 +111,15 @@ class Carnivore(Fauna):
         else:
             return 1
 
+    @staticmethod
+    def set_parameters(given_params):
+        for param in given_params:
+            if param in Carnivore.parameters:
+                Carnivore.parameters[param] = \
+                    given_params[param]
+            else:
+                raise ValueError('Parameter not in list' + str(param))
+
 
 class Herbivore(Fauna):
     parameters = {'w_birth': 8.0, 'sigma_birth': 1.5, 'beta': 0.9,
@@ -128,7 +128,7 @@ class Herbivore(Fauna):
                   'lambda': 1.0, 'gamma': 0.2, 'zeta': 3.5,
                   'xi': 1.2, 'omega': 0.4, 'F': 10.0}
 
-    def __init__(self, given_params=None):
+    def __init__(self, given_params):
         super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
@@ -137,3 +137,12 @@ class Herbivore(Fauna):
         if self.weight is None:
             self.weight = np.random.normal(self.parameters['w_birth'],
                                            self.parameters['sigma_birth'])
+
+    @staticmethod
+    def set_parameters(given_params):
+        for param in given_params:
+            if param in Herbivore.parameters:
+                Herbivore.parameters[param] = \
+                    given_params[param]
+            else:
+                raise ValueError('Parameter not in list' + str(param))

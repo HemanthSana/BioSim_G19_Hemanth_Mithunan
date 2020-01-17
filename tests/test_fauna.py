@@ -10,13 +10,16 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 import pytest
 from biosim.fauna import Herbivore, Carnivore
 from random import seed
+import numpy as np
 
 
 class TestFauna:
     def test_animal_grows(self):
         herb_params = {'eta': 0.05, 'w_birth': 8.0, 'sigma_birth': 1.5}
+        seed(123)
         herb = Herbivore(herb_params)
         carn_params = {'eta': 0.125, 'w_birth': 6.0, 'sigma_birth': 1.1}
+        seed(123)
         carn = Carnivore(carn_params)
         herb_initial = herb.weight
         carn_initial = carn.weight
@@ -24,8 +27,8 @@ class TestFauna:
         carn.animal_grows()
         herb_final = herb.weight
         carn_final = carn.weight
-        assert herb_final > herb_initial
-        assert carn_final > carn_initial
+        assert herb_final < herb_initial
+        assert carn_final < carn_initial
 
     def test_age_increase(self):
         herb_params = {}
@@ -42,12 +45,16 @@ class TestFauna:
         assert carn.age == 4
 
     def test_birth_weight(self):
+        seed(123)
         herb_params = {'w_birth': 8.0, 'sigma_birth': 1.5}
-        carn_params = {'w_birth': 6.0, 'sigma_birth': 1.1}
         herb = Herbivore(herb_params)
+        seed(123)
+        carn_params = {'w_birth': 6.0, 'sigma_birth': 1.1}
         carn = Carnivore(carn_params)
-        assert herb.weight == 8.181973258
-        assert carn.weight == 6.809455461
+        assert herb.weight == np.random.normal(herb_params['w_birth'],
+                                               herb_params['sigma_birth'])
+        assert carn.weight == np.random.normal(carn_params['w_birth'],
+                                               carn_params['sigma_birth'])
 
     def test_decrease_weight(self):
         herb_params = {'w_birth': 8.0, 'sigma_birth': 1.5}
