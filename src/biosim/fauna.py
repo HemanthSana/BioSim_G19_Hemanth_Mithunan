@@ -58,9 +58,10 @@ class Fauna:
             q_age = 1 / (1 + math.e ** (self.parameters['phi_age'] *
                                         (self.age -
                                          self.parameters['a_half'])))
-            q_weight = 1 / (1 + math.e ** (-(self.parameters['phi_weight'] *
-                                             (self.weight -
-                                              self.parameters['w_half']))))
+            q_weight = 1 / (1 + math.e ** (-1 * (self.parameters['phi_weight']
+                                                 * (self.weight -
+                                                    self.parameters['w_half'])
+                                                 )))
             return q_age * q_weight
         else:
             return 0
