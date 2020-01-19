@@ -9,6 +9,7 @@ import math
 import numpy as np
 from random import gauss
 
+
 class Fauna:
     parameters = {}
 
@@ -88,6 +89,17 @@ class Fauna:
     def probability_of_move(self):
         return self.parameters['mu'] * self.animal_fitness
 
+    @classmethod
+    def set_parameters(cls, given_params):
+        for param in given_params:
+            if param in cls.parameters:
+                if given_params[param] <= 0:
+                    raise ValueError('Parameter value should be positive')
+                else:
+                    cls.parameters[param] = given_params[param]
+            else:
+                raise ValueError('Parameter not in class parameter list')
+
 
 class Carnivore(Fauna):
     parameters = {'w_birth': 6.0, 'sigma_birth': 1.0, 'beta': 0.75,
@@ -97,32 +109,19 @@ class Carnivore(Fauna):
                   'xi': 1.1, 'omega': 0.9, 'F': 50.0,
                   'DeltaPhiMax': 10.0}
 
-    def __init__(self, given_params):
+    def __init__(self):
         super().__init__()
-        if given_params is not None:
-            self.set_parameters(given_params)
         self.parameters = Carnivore.parameters
 
-        if self.weight is None:
-            self.weight = np.random.normal(self.parameters['w_birth'],
-                                           self.parameters['sigma_birth'])
-
     def probability_of_kill(self, herb):
-        if self.fitness <= herb.fitness:
+        if self.animal_fitness <= herb.animal_fitness:
             return 0
-        elif 0 < self.fitness - herb < self.parameters['DeltaPhiMax']:
-            return (self.fitness - herb.fitness)/self.parameters['DeltaPhiMax']
+        elif 0 < self.animal_fitness - herb.animal_fitness < \
+                self.parameters['DeltaPhiMax']:
+            return (self.animal_fitness - herb.animal_fitness) / \
+                   self.parameters['DeltaPhiMax']
         else:
             return 1
-
-    @staticmethod
-    def set_parameters(given_params):
-        for param in given_params:
-            if param in Carnivore.parameters:
-                Carnivore.parameters[param] = \
-                    given_params[param]
-            else:
-                raise ValueError('Parameter not in list' + str(param))
 
 
 class Herbivore(Fauna):
@@ -132,21 +131,7 @@ class Herbivore(Fauna):
                   'lambda': 1.0, 'gamma': 0.2, 'zeta': 3.5,
                   'xi': 1.2, 'omega': 0.4, 'F': 10.0}
 
-    def __init__(self, given_params):
+    def __init__(self, age=None, weight=None):
         super().__init__()
-        if given_params is not None:
-            self.set_parameters(given_params)
-            self.parameters = Herbivore.parameters
+        self.parameters = Herbivore.parameters
 
-        if self.weight is None:
-            self.weight = np.random.normal(self.parameters['w_birth'],
-                                           self.parameters['sigma_birth'])
-
-    @staticmethod
-    def set_parameters(given_params):
-        for param in given_params:
-            if param in Herbivore.parameters:
-                Herbivore.parameters[param] = \
-                    given_params[param]
-            else:
-                raise ValueError('Parameter not in list' + str(param))
