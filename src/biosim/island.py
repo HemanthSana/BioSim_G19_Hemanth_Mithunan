@@ -11,6 +11,7 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 from biosim.landscape import *
 import numpy as np
+from biosim.fauna import Herbivore, Carnivore
 
 
 class Island:
@@ -18,45 +19,54 @@ class Island:
     Type of cell in island can be O for Ocean, S for Savannah,
     M for Mountain, J for Jungle, D for Desert
     """
-    def __init__(self, geo_multiline_string, fauna_instance):
+    def __init__(self, island_map, ini_pop=None):
         """
 
         :param geo_multiline_string: Multiline String with characters
         ex: O, S, M, J, D
         """
+        self.landscape_dict = {'O': Ocean,
+                               'M': Mountain,
+                               'D': Desert,
+                               'S': Savannah,
+                               'J': Jungle}
+        self.fauna_dict = {'Herbivore': Herbivore,
+                           'Carnivore': Carnivore}
+        self.island_map = self.string_to_np_array(island_map)
+        self.edge_condition(self.island_map)
+        self.cell_type_map = self.create_array_with_landscape_objects()
+        self.add_animals(ini_pop)
 
-        # better to use different file and
-        # numpy array as discussed with daniel removethis
+    @staticmethod
+    def string_to_np_array(map_str):
+        map_str_clean = map_str.replace(' ', '')
+        char_map = np.array(
+            [[col for col in row] for row in map_str_clean.splitlines()])
+        return char_map
 
-        self.geo_multiline_string = geo_multiline_string
+    @staticmethod
+    def edge_condition(map_array):
+        rows = map_array.shape[0]
+        cols = map_array.shape[1]
+        map_edges = [map_array[0, :cols], map_array[rows - 1, :cols],
+                     map_array[:rows - 1, 0], map_array[:rows - 1, cols - 1]]
+        for edge in map_edges:
+            if not np.all(edge == 'O'):
+                raise ValueError('Edges of the map should have only '
+                                 'Ocean cells')
 
-        self.island_object_dict = {'O': Ocean, 'M': Mountain, 'D': Desert,
-                                   'S': Savannah, 'J': Jungle}
-        self.fauna_instance = fauna_instance
+    def create_array_with_landscape_objects(self):
+        cell_type_array = np.empty(self.island_map.shape, dtype=object)
+        for row in np.arange(self.island_map.shape[0]):
+            for col in np.arange(self.island_map.shape[1]):
+                cell_type = self.island_map[row][col]
+                cell_type_array[row][col] = self.landscape_dict[cell_type]
+        return cell_type_array
 
-    def get_array_from_string(self):
-        # cleaning to avoid garbage data
-        geo_string = self.geo_multiline_string.replace(' ', '')
+    # def adjacent_cells(self, map_array, x, y):
+    #     rows = map_array.shape[0]
+    #     cols = map_array.shape[1]
 
-        # converting string to numpy 2D array
-        geo_string_rows = geo_string.splitlines()
-        geo_array = np.array([[col for col in row]
-                              for row in geo_string_rows])
-
-        # creating a numpy array with data type as object from landscape class
-        geo_cell_type_array = np.empty(geo_array.shape, dtype=object)
-
-        # changing the characters in array to objects
-        # iterate through each element in the array
-        for rows in np.arange(geo_array.shape[0]):
-            for columns in np.arange(geo_array.shape[1]):
-                # maps the char to class object to know which cell
-                cell_type = self.island_object_dict[geo_array[rows][columns]]
-                # instantiate the object of respective classes in the array
-                geo_cell_type_array[rows][columns] = cell_type(
-                    self.fauna_instance)
-
-        return geo_cell_type_array
 
     def animal_migrates(self):
         island_array = self.get_array_from_string()
@@ -81,29 +91,3 @@ class Island:
 
                         current_cell.remove_animal(animal)
                         max_probable_cell.add_animal(animal)
-
-
-
-
-        if 0:
-            # splitting input string to lines i.e., rows
-            self.rows = self.input_map.splitlines()
-
-            # Check if all the cells are valid
-            for row in self.rows:
-                for cell in row:
-                    if cell not in self.cell_list:
-                        raise ValueError("Invalid Cell Type")
-
-            # Check if all rows have equal length
-            row_lengths = [len(row) for row in self.rows]
-            for length in row_lengths:
-                if length != row_lengths[0]:
-                    raise ValueError("All rows must be of same length")
-
-            # Check if the edge cells are Ocean
-            # ToDo
-            for row in self.rows:
-                for cell in row[0, len(self.rows)-1]:
-                    if cell != 'O':
-                        raise ValueError("Ocean is not on the edges")

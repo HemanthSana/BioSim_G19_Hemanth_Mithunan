@@ -234,11 +234,11 @@ class Mountain(Landscape):
         # child class of Landscape
         super().__init__(animals_list)
         if animals_list is not None:
-            raise ValueError('Animals cannot be in ocean')
-        self.remaining_food['Herbivore'] = Ocean.remaining_food['Herbivore']
-        self.remaining_food['Carnivore'] = Ocean.remaining_food['Carnivore']
-        self.animals_list['Herbivore'] = Ocean.animals_list['Herbivore']
-        self.animals_list['Carnivore'] = Ocean.animals_list['Carnivore']
+            raise ValueError('Animals cannot be in Mountain')
+        self.remaining_food['Herbivore'] = Mountain.remaining_food['Herbivore']
+        self.remaining_food['Carnivore'] = Mountain.remaining_food['Carnivore']
+        self.animals_list['Herbivore'] = Mountain.animals_list['Herbivore']
+        self.animals_list['Carnivore'] = Mountain.animals_list['Carnivore']
 
 
 class Ocean(Landscape):
@@ -254,7 +254,8 @@ class Ocean(Landscape):
         # child class of Landscape
         super().__init__(animals_list)
         if animals_list is not None:
-            raise ValueError('Animals cannot be in ocean')
+            raise ValueError('Animals cannot be in Ocean')
         self.remaining_food['Herbivore'] = Ocean.remaining_food['Herbivore']
         self.remaining_food['Carnivore'] = Ocean.remaining_food['Carnivore']
-        self.animals_list = Ocean.animals_list
+        self.animals_list['Herbivore'] = Ocean.animals_list['Herbivore']
+        self.animals_list['Carnivore'] = Ocean.animals_list['Carnivore']
