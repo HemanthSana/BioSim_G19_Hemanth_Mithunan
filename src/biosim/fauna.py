@@ -7,32 +7,35 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import math
 import numpy as np
-
+from random import gauss
 
 class Fauna:
-    # parameters = {}
+    parameters = {}
 
-    def __init__(self):
+    def __init__(self, age=None, weight=None):
         # At the start age is zero
-        self.age = 0
-        self.weight = None
-        self.parameters = {}
+        if age is None:
+            self.age = 0
+        else:
+            self.age = age
+        if weight is None:
+            self.weight = gauss(self.parameters['w_birth'],
+                                self.parameters['sigma_birth'])
+        else:
+            self.weight = weight
         self.fitness = 0
-        self.given_params = None
-        # animal = {Herbivore, Carnivore}
 
     @property
     def animal_weight(self):
         return self.weight
 
-    def increase_weight(self, fodder_eaten):
+    def increase_animal_weight(self, fodder_eaten):
         """
 
         :param fodder_eaten: Amount of fodder ate by animal in a year
         :return: amount of increase in weight
         """
-        beta = self.parameters['beta']
-        self.weight += beta * fodder_eaten
+        self.weight += self.parameters['beta'] * fodder_eaten
 
     def decrease_animal_weight(self, const):
         """
@@ -50,7 +53,7 @@ class Fauna:
         self.decrease_animal_weight(self.parameters['eta'])
 
     def animal_eats(self, food_eaten):
-        self.weight += self.parameters['beta'] * food_eaten
+        self.increase_animal_weight(food_eaten)
 
     @property
     def animal_fitness(self):
