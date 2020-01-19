@@ -58,20 +58,14 @@ class Fauna:
     @property
     def animal_fitness(self):
         if self.weight > 0:
-            q_age = 1 / (1 + math.e ** (self.parameters['phi_age'] *
-                                        (self.age -
-                                         self.parameters['a_half'])))
-            q_weight = 1 / (1 + math.e ** (-1 * (self.parameters['phi_weight']
-                                                 * (self.weight -
-                                                    self.parameters['w_half'])
-                                                 )))
+            q_age = 1 / (1 + math.exp(self.parameters['phi_age'] *
+                                      (self.age - self.parameters['a_half'])))
+            q_weight = 1 / (1 + math.exp(-1 * (self.parameters['phi_weight'] *
+                                               (self.weight -
+                                                self.parameters['w_half']))))
             return q_age * q_weight
         else:
             return 0
-
-    @property
-    def probability_of_move(self):
-        return self.parameters['mu'] * self.animal_fitness
 
     def probability_of_birth(self, num_animals):
         if num_animals > 1 and self.weight >= self.parameters['zeta'] * \
@@ -81,12 +75,18 @@ class Fauna:
         else:
             return 0
 
-    @property
+    def update_weight_after_birth(self, offspring):
+        self.weight -= offspring.weight * offspring.parameters['xi']
+
     def probability_of_death(self):
         if self.animal_fitness == 0:
             return 1
         else:
             return self.weight * (1 - self.animal_fitness)
+
+    @property
+    def probability_of_move(self):
+        return self.parameters['mu'] * self.animal_fitness
 
 
 class Carnivore(Fauna):
