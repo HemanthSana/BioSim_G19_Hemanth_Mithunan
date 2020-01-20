@@ -87,7 +87,7 @@ class Fauna:
         """
 
         :param num_animals: Number of animals of same species in cell
-        :return:floating point value of probability
+        :return: floating point value of probability
         """
         if num_animals > 1 and self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):

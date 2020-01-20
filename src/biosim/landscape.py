@@ -181,7 +181,7 @@ class Landscape:
         """
         herb_count = len(self.fauna_list['Herbivore'])
         carn_count = len(self.fauna_list['Carnivore'])
-        return {'Herbivore': herb_count, 'Carnivore' : carn_count}
+        return {'Herbivore': herb_count, 'Carnivore': carn_count}
 
 
 class Jungle(Landscape):

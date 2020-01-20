@@ -7,9 +7,9 @@ Does all the graphics stuff
 _author_ = "Hemanth Sana & Mithunan Sivagnanam"
 _email_ = "hesa@nmbu.no & misi@nmbu.no"
 
+import numpy as np
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 class Graphics:
@@ -34,6 +34,13 @@ class Graphics:
         self.map_dims = map_dimensions
         self.map_colors = Graphics.map_colors
         self.map_graph = None
+        self.herbivore_curve = None
+        self.carnivore_curve = None
+        self.herbivore_dist = None
+        self.carnivore_dist = None
+        self.mean_ax = None
+        self.herbivore_image_axis = None
+        self.carnivore_image_axis =  None
 
     def generate_map_array(self):
         """
@@ -59,7 +66,7 @@ class Graphics:
 
         return map_array
 
-    def visualise_map(self):
+    def generate_island_graph(self):
         """
         create a map for island
         :return:
@@ -73,3 +80,86 @@ class Graphics:
             self.map_graph.set_yticks(range(0, b, 5))
             self.map_graph.set_yticklabels(range(0, b, 5))
             self.map_graph.set_title('Island')
+
+    def generate_carnivore_graph(self, final_year):
+        if self.carnivore_curve is None:
+            plot = self.mean_ax.plot(np.arange(0, final_year),
+                                     np.full(final_year, np.nan))
+            self.carnivore_curve = plot[0]
+        else:
+            xdata, ydata = self.carnivore_curve.get_data()
+            xnew = np.arange(xdata[-1] + 1, final_year)
+            if len(xnew) > 0:
+                ynew = np.full(xnew.shape, np.nan)
+                x_stack = np.hstack((xdata, xnew))
+                y_stack = np.hstack((ydata, ynew))
+                self.carnivore_curve.set_data(x_stack, y_stack)
+
+    def generate_herbivore_graph(self, final_year):
+        if self.herbivore_curve is None:
+            plot = self.mean_ax.plot(np.arange(0, final_year),
+                                     np.full(final_year, np.nan))
+            self.herbivore_curve = plot[0]
+        else:
+            x_data, y_data = self.herbivore_curve.get_data()
+            x_new = np.arange(x_data[-1] + 1, final_year)
+            if len(x_new) > 0:
+                y_new = np.full(x_new.shape, np.nan)
+                x_stack = np.hstack((x_data, x_new))
+                y_stack = np.hstack((y_data, y_new))
+                self.herbivore_curve.set_data(x_stack, y_stack)
+
+    def update_graphs(self, year, herb_count, carn_count):
+        herb_ydata = self.herbivore_curve.get_ydata()
+        herb_ydata[year] = herb_count
+        self.herbivore_curve.set_ydata(herb_ydata)
+
+        carn_ydata = self.carnivore_curve.get_ydata()
+        carn_ydata[year] = carn_count
+        self.carnivore_curve.set_ydata(carn_ydata)
+        plt.pause(1e-4)
+
+    def generate_animal_graphs(self, final_year):
+        if self.mean_ax is None:
+            self.mean_ax = self.fig.add_subplot(2, 2, 2)
+            self.mean_ax.set_ylim(0, 10000)
+        self.mean_ax.set_xlim(0, final_year + 1)
+        self.generate_herbivore_graph(final_year)
+        self.generate_carnivore_graph(final_year)
+
+    def animal_dist_graphs(self):
+        if self.herbivore_dist is None:
+            self.herbivore_dist =  self.fig.add_subplot(2, 2, 3)
+            self.herbivore_image_axis = None
+
+        if self.carnivore_dist is None:
+            self.herbivore_dist = self.fig.add_subplot(2, 2, 4)
+            self.carnivore_image_axis = None
+
+    def update_herbivore_dist(self, distribution):
+        if self.herbivore_image_axis is not None:
+            self.herbivore_image_axis.set_data(distribution)
+        else:
+            y, x = self.map_dims
+            self.herbivore_dist.imshow(distribution,
+                                       interpolation='nearest',
+                                       vmin=0, vmax=10)
+            self.herbivore_dist.set_xticks(range(0, x, 5))
+            self.herbivore_dist.set_xticklabels(range(1, 1 + x, 5))
+            self.herbivore_dist.set_yticks(range(0, y, 5))
+            self.herbivore_dist.set_yticklabels(range(1, 1 + y, 5))
+            self.herbivore_dist.set_title('Herbivore Distribution')
+
+    def update_carnivore_dist(self, distribution):
+        if self.carnivore_image_axis is not None:
+            self.carnivore_image_axis.set_data(distribution)
+        else:
+            y, x = self.map_dims
+            self.carnivore_dist.imshow(distribution,
+                                       interpolation='nearest',
+                                       vmin=0, vmax=10)
+            self.carnivore_dist.set_xticks(range(0, x, 5))
+            self.carnivore_dist.set_xticklabels(range(1, 1 + x, 5))
+            self.carnivore_dist.set_yticks(range(0, y, 5))
+            self.carnivore_dist.set_yticklabels(range(1, 1 + y, 5))
+            self.carnivore_dist.set_title('Carnivore Distribution')

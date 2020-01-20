@@ -19,7 +19,7 @@ class Island:
     Type of cell in island can be O for Ocean, S for Savannah,
     M for Mountain, J for Jungle, D for Desert
     """
-    def __init__(self, island_map, ini_pop=None):
+    def __init__(self, island_map):
         self.landscape_dict = {'O': Ocean,
                                'M': Mountain,
                                'D': Desert,
@@ -30,7 +30,6 @@ class Island:
         self.island_map = self.string_to_np_array(island_map)
         self.edge_condition(self.island_map)
         self.cell_type_map = self.create_array_with_landscape_objects()
-        self.add_animals(ini_pop)
 
     @property
     def map_dimensions(self):

@@ -9,9 +9,12 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from biosim.island import Island
 from biosim.landscape import Ocean, Savannah, Desert, Jungle, Mountain
+from biosim.fauna import Herbivore, Carnivore
+from biosim.graphics import Graphics
 
 
 class BioSim:
@@ -55,6 +58,13 @@ class BioSim:
         self.island_map = island_map
         self.map = Island(island_map)
         np.random.seed(seed)
+        self.add_population(ini_pop)
+
+        if ymax_animals is None:
+            self.ymax_animals = None
+        else:
+            self.ymax_animals = ymax_animals
+
         self.animal_species = ['Carnivore', 'Herbivore']
         self.landscapes = {'O': Ocean,
                            'S': Savannah,
@@ -62,8 +72,9 @@ class BioSim:
                            'J': Jungle,
                            'D': Desert}
         self.landscape_with_parameters = [Savannah, Jungle]
-        self.step = 0
-        self.final_step = None
+        self.vis = None
+        self.current_year = 0
+        self.final_year = None
 
         self.fig = None
         self.img_axis = None
@@ -115,25 +126,31 @@ class BioSim:
         if img_years is None:
             img_years = vis_years
 
-        self.final_step = self.step + num_years
+        self.final_year = self.current_year + num_years
         self.setup_graphics()
 
-        while self.step < self.final_step:
-            if self.step % vis_years == 0:
+        while self.current_year < self.final_year:
+            if self.current_year % vis_years == 0:
                 self.update_graphics()
 
-            if self.step % img_years == 0:
+            if self.current_year % img_years == 0:
                 self.save_graphics()
 
             self.map.update()
-            self.step += 1
+            self.current_year += 1
 
     def setup_graphics(self):
-        map_dimensions = self.map.map_dimensions
+        map_dims = self.map.map_dimensions
 
         if self.fig is None:
             self.fig = plt.figure()
-            self.vis = Graphics
+            self.vis = Graphics(self, self.island_map,
+                                self.fig, map_dims)
+
+            self.vis.generate_island_graph()
+            self.vis.generate_animal_graphs(self.final_year)
+
+            self.vis.animal_dist_graphs()
 
     def update_graphics(self):
         pass
@@ -152,32 +169,39 @@ class BioSim:
     @property
     def year(self):
         """Last year simulated."""
-        return self.step
+        return self.current_year
 
     @property
     def num_animals(self):
         """Total number of animals on island."""
         animal_count = 0
-        for animal in self.animal_species:
-            animal_count += len(animal['pop'])
+        for species in self.animal_species:
+            animal_count += self.map.total_animals_per_species(species)
             return animal_count
 
     @property
     def num_animals_per_species(self):
         """Number of animals per species in island, as dictionary."""
-        animal_count_dict = {'Herbivore': 0, 'Carnivore': 0}
-        for animal in self.ini_pop:
-            if animal['pop'][0]['species'] == 'Herbivore':
-                animal_count_dict['Herbivore'] += len(animal['pop'])
-            elif animal['pop'][0]['species'] == 'Carnivore':
-                animal_count_dict['Carnivore'] += len(animal['pop'])
-        return animal_count_dict
+        num_fauna_per_species = {}
+        for species in self.animal_species:
+            num_fauna_per_species[species] = self.map.\
+                total_animals_per_species(species)
+        return num_fauna_per_species
 
     @property
     def animal_distribution(self):
         """Pandas DataFrame with animal count per species for each cell
         on island."""
-        pass
+        animal_df = []
+        rows, cols = self.map.map_dimensions
+        for row in range(rows):
+            for col in range(cols):
+                cell = self.map.cell_type_map[row, col]
+                animal_count = cell.cell_fauna_count
+                animal_df.append({'row': row, 'col': col,
+                                  'carnivores': animal_count['Carnivore'],
+                                  'herbivores': animal_count['Herbivore']})
+        return pd.DataFrame(animal_df)
 
     def make_movie(self):
         """Create MPEG4 movie from visualization images saved."""
