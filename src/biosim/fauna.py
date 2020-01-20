@@ -102,7 +102,8 @@ class Fauna:
         :param offspring: object either Herbivore or Carnivore
         :return: decreased weight after birth
         """
-        self.weight -= offspring.weight * offspring.parameters['xi']
+        if self.weight > offspring.weight * offspring.parameters['xi']:
+            self.weight -= offspring.weight * offspring.parameters['xi']
 
     def probability_of_death(self):
         """

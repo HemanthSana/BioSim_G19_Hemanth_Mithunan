@@ -24,8 +24,6 @@ class Landscape:
 
     def __init__(self):
         """
-
-        :param animals_list: list of animals in the cell
         """
         self.sorted_animal_fitness = {}
         self.fauna_list = {'Herbivore': [], 'Carnivore': []}
@@ -42,7 +40,7 @@ class Landscape:
             animal_fitness[animal] = animal.fitness
         self.sorted_animal_fitness[species] = animal_fitness
 
-    def order_by_fitness(self, species, to_sort_objects, reverse=True):
+    def order_by_fitness(self, to_sort_objects, species, reverse=True):
         """
 
         :param species:list of objects
@@ -156,22 +154,48 @@ class Landscape:
         self.herbivore_eats()
         self.carnivore_eats()
 
+    def update_fodder(self):
+        return
+
     def update_animal_weight_age(self):
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
                 animal.animal_grows()
 
     def animal_gives_birth(self):
-        for animal in self.fauna_list:
-            if np.random.random() > animal.probability_of_birth(len(self.fauna_list)):
-                species = type(animal)
-                offspring = species()
-                animal.update_weight_after_birth(offspring)
+        for species in self.fauna_list:
+            for animal in self.fauna_list[species]:
+                if np.random.random() > animal.probability_of_birth:
+                    species = animal.__class__
+                    offspring = species()
+                    animal.update_weight_after_birth(offspring)
 
     def animal_dies(self):
-        for animal in self.fauna_list:
-            if np.random.random() > animal.probability_of_death():
+        for species in self.fauna_list:
+            for animal in self.fauna_list[species]:
+                if np.random.random() > animal.probability_of_death:
+                    self.remove_animal(animal)
+
+    def animal_migrates(self, adj_cells):
+        for species, animals in self.fauna_list.items():
+            for animal in animals:
+                if np.random.random() > animal.probability_of_move:
+                    propensity = [cell.propensity_to_move(animal)
+                                  for cell in adj_cells]
+                    total_propensity = sum(propensity)
+                    probability = [cell.probability_move_to_cell(
+                        animal, total_propensity)
+                        for cell in adj_cells]
+                    cum_probability = np.cumsum(probability)
+                    for idx, prob in enumerate(cum_probability):
+                        cell_to_migrate = adj_cells[idx]
+                        cell_to_migrate.add_animal(animal)
                 self.remove_animal(animal)
+
+    def grow_all_animals(self):
+        for species in self.fauna_list:
+            for animal in self.fauna_list[species]:
+                animal.animal_grows()
 
     @property
     def cell_fauna_count(self):
@@ -273,7 +297,7 @@ class Mountain(Landscape):
         Represents the landscape covered by mountain cells
         In these cells animals cannot migrate and there is no fodder
     """
-    is_migratable = False
+    is_migratable = True
     remaining_food = {'Herbivore': 0, 'Carnivore': 0}
     animals_list = {'Herbivore': [], 'Carnivore': []}
 

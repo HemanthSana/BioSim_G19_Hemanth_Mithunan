@@ -4,8 +4,8 @@
 Does all the graphics stuff
 """
 
-_author_ = "Hemanth Sana & Mithunan Sivagnanam"
-_email_ = "hesa@nmbu.no & misi@nmbu.no"
+__author__ = "Hemanth Sana & Mithunan Sivagnanam"
+__email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import numpy as np
 import matplotlib.colors as mcolors
@@ -28,10 +28,11 @@ class Graphics:
         "M": "Mountain",
     }
 
-    def __init__(self, map_layout, figure, map_dimensions):
+    def __init__(self, map_layout, figure, horizontal, vertical):
         self.map_layout = map_layout
         self.fig = figure
-        self.map_dims = map_dimensions
+        self.x_dir = horizontal
+        self.y_dir = vertical
         self.map_colors = Graphics.map_colors
         self.map_graph = None
         self.herbivore_curve = None
@@ -40,7 +41,7 @@ class Graphics:
         self.carnivore_dist = None
         self.mean_ax = None
         self.herbivore_image_axis = None
-        self.carnivore_image_axis =  None
+        self.carnivore_image_axis = None
 
     def generate_map_array(self):
         """
@@ -73,12 +74,13 @@ class Graphics:
         """
         if self.map_graph is None:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
-            b, a = self.map_dims
+            x = self.x_dir
+            y = self.y_dir
             self.map_graph.imshow(self.generate_map_array())
-            self.map_graph.set_xticks(range(0, a, 5))
-            self.map_graph.set_xticklabels(range(0, a, 5))
-            self.map_graph.set_yticks(range(0, b, 5))
-            self.map_graph.set_yticklabels(range(0, b, 5))
+            self.map_graph.set_xticks(range(0, x, 5))
+            self.map_graph.set_xticklabels(range(0, x, 5))
+            self.map_graph.set_yticks(range(0, y, 5))
+            self.map_graph.set_yticklabels(range(0, y, 5))
             self.map_graph.set_title('Island')
 
     def generate_carnivore_graph(self, final_year):
@@ -117,47 +119,48 @@ class Graphics:
         carn_ydata = self.carnivore_curve.get_ydata()
         carn_ydata[year] = carn_count
         self.carnivore_curve.set_ydata(carn_ydata)
-        plt.pause(1e-4)
 
-    def generate_animal_graphs(self, final_year):
+    def generate_animal_graphs(self, final_year, y_lim):
         if self.mean_ax is None:
             self.mean_ax = self.fig.add_subplot(2, 2, 2)
-            self.mean_ax.set_ylim(0, 10000)
+            self.mean_ax.set_ylim(0, y_lim)
         self.mean_ax.set_xlim(0, final_year + 1)
         self.generate_herbivore_graph(final_year)
         self.generate_carnivore_graph(final_year)
 
     def animal_dist_graphs(self):
         if self.herbivore_dist is None:
-            self.herbivore_dist =  self.fig.add_subplot(2, 2, 3)
+            self.herbivore_dist = self.fig.add_subplot(2, 2, 3)
             self.herbivore_image_axis = None
 
         if self.carnivore_dist is None:
             self.herbivore_dist = self.fig.add_subplot(2, 2, 4)
             self.carnivore_image_axis = None
 
-    def update_herbivore_dist(self, distribution):
+    def update_herbivore_dist(self, distribution, v_max):
         if self.herbivore_image_axis is not None:
             self.herbivore_image_axis.set_data(distribution)
         else:
-            y, x = self.map_dims
+            x = self.x_dir
+            y = self.y_dir
             self.herbivore_dist.imshow(distribution,
                                        interpolation='nearest',
-                                       vmin=0, vmax=10)
+                                       vmin=0, vmax=v_max)
             self.herbivore_dist.set_xticks(range(0, x, 5))
             self.herbivore_dist.set_xticklabels(range(1, 1 + x, 5))
             self.herbivore_dist.set_yticks(range(0, y, 5))
             self.herbivore_dist.set_yticklabels(range(1, 1 + y, 5))
             self.herbivore_dist.set_title('Herbivore Distribution')
 
-    def update_carnivore_dist(self, distribution):
+    def update_carnivore_dist(self, distribution, v_max):
         if self.carnivore_image_axis is not None:
             self.carnivore_image_axis.set_data(distribution)
         else:
-            y, x = self.map_dims
+            x = self.x_dir
+            y = self.y_dir
             self.carnivore_dist.imshow(distribution,
                                        interpolation='nearest',
-                                       vmin=0, vmax=10)
+                                       vmin=0, vmax=v_max)
             self.carnivore_dist.set_xticks(range(0, x, 5))
             self.carnivore_dist.set_xticklabels(range(1, 1 + x, 5))
             self.carnivore_dist.set_yticks(range(0, y, 5))
