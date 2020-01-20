@@ -7,7 +7,11 @@ Simulates the whole project
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
+import matplotlib.pyplot as plt
 import numpy as np
+
+from biosim.island import Island
+from biosim.landscape import Ocean, Savannah, Desert, Jungle, Mountain
 
 
 class BioSim:
@@ -49,15 +53,20 @@ class BioSim:
         img_base should contain a path and beginning of a file name.
         """
         self.island_map = island_map
-        self.ini_pop = ini_pop
+        self.map = Island(island_map)
         np.random.seed(seed)
-        self.ymax_animals = ymax_animals
-        self.cmax_animals = cmax_animals
-        self.img_base = img_base
-        self.img_fmt = img_fmt
-        self.animal_params = {'Herbivore': {}, 'Carnivore': {}}
-        self.landscape_params = {'J': {}, 'S': {}, 'D': {}, 'M': {}, 'O': {}}
-        self.last_year = 0
+        self.animal_species = ['Carnivore', 'Herbivore']
+        self.landscapes = {'O': Ocean,
+                           'S': Savannah,
+                           'M': Mountain,
+                           'J': Jungle,
+                           'D': Desert}
+        self.landscape_with_parameters = [Savannah, Jungle]
+        self.step = 0
+        self.final_step = None
+
+        self.fig = None
+        self.img_axis = None
 
     def set_animal_parameters(self, species, params):
         """
@@ -66,8 +75,12 @@ class BioSim:
         :param species: String, name of animal species
         :param params: Dict with valid parameter specification for species
         """
-        for param in params:
-            self.animal_params[species][param] = params[param]
+        if species in self.animal_species:
+            species_type = eval(species)
+            species_type.set_parameters(params)
+        else:
+            raise TypeError(species + ' parameters can\'t be assigned, '
+                                      'there is no such data type')
 
     def set_landscape_parameters(self, landscape, params):
         """
@@ -76,8 +89,17 @@ class BioSim:
         :param landscape: String, code letter for landscape
         :param params: Dict with valid parameter specification for landscape
         """
-        for param in params:
-            self.animal_params[landscape][param] = params[param]
+        if landscape in self.landscapes:
+            landscape_type = self.landscapes[landscape]
+            if landscape_type in \
+                    self.landscape_with_parameters:
+                landscape_type.set_parameters(params)
+            else:
+                raise ValueError(landscape + ' parameter is not valid')
+
+        else:
+            raise TypeError(landscape + ' parameters can\'t be assigned, '
+                                        'there is no such data type')
 
     def simulate(self, num_years, vis_years=1, img_years=None):
         """
@@ -90,6 +112,33 @@ class BioSim:
 
         Image files will be numbered consecutively.
         """
+        if img_years is None:
+            img_years = vis_years
+
+        self.final_step = self.step + num_years
+        self.setup_graphics()
+
+        while self.step < self.final_step:
+            if self.step % vis_years == 0:
+                self.update_graphics()
+
+            if self.step % img_years == 0:
+                self.save_graphics()
+
+            self.map.update()
+            self.step += 1
+
+    def setup_graphics(self):
+        map_dimensions = self.map.map_dimensions
+
+        if self.fig is None:
+            self.fig = plt.figure()
+            self.vis = Graphics
+
+    def update_graphics(self):
+        pass
+
+    def save_graphics(self):
         pass
 
     def add_population(self, population):
@@ -98,18 +147,18 @@ class BioSim:
 
         :param population: List of dictionaries specifying population
         """
-        self.ini_pop.append(population[0])
+        self.map.add_animals(population)
 
     @property
     def year(self):
         """Last year simulated."""
-        return self.last_year
+        return self.step
 
     @property
     def num_animals(self):
         """Total number of animals on island."""
         animal_count = 0
-        for animal in self.ini_pop:
+        for animal in self.animal_species:
             animal_count += len(animal['pop'])
             return animal_count
 

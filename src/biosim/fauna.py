@@ -11,10 +11,12 @@ from random import gauss
 
 
 class Fauna:
+    """
+    Fauna Base Class for Herbivore and Carnivore
+    """
     parameters = {}
 
     def __init__(self, age=None, weight=None):
-        # At the start age is zero
         if age is None:
             self.age = 0
         else:
@@ -28,6 +30,10 @@ class Fauna:
 
     @property
     def animal_weight(self):
+        """
+
+        :return: value of weight
+        """
         return self.weight
 
     def increase_animal_weight(self, fodder_eaten):
@@ -54,10 +60,19 @@ class Fauna:
         self.decrease_animal_weight(self.parameters['eta'])
 
     def animal_eats(self, food_eaten):
+        """
+
+        :param food_eaten: amount of food depends on species
+        :return: increased weight
+        """
         self.increase_animal_weight(food_eaten)
 
     @property
     def animal_fitness(self):
+        """
+        Calculates and returns fitness value of animal
+        :return: fitness value
+        """
         if self.weight > 0:
             q_age = 1 / (1 + math.exp(self.parameters['phi_age'] *
                                       (self.age - self.parameters['a_half'])))
@@ -69,6 +84,11 @@ class Fauna:
             return 0
 
     def probability_of_birth(self, num_animals):
+        """
+
+        :param num_animals: Number of animals of same species in cell
+        :return:floating point value of probability
+        """
         if num_animals > 1 and self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
             return min(1, self.parameters['gamma'] * self.animal_fitness *
@@ -77,20 +97,38 @@ class Fauna:
             return 0
 
     def update_weight_after_birth(self, offspring):
+        """
+
+        :param offspring: object either Herbivore or Carnivore
+        :return: decreased weight after birth
+        """
         self.weight -= offspring.weight * offspring.parameters['xi']
 
     def probability_of_death(self):
+        """
+
+        :return: a floating point value depending on fitness
+        """
         if self.animal_fitness == 0:
             return 1
         else:
-            return self.weight * (1 - self.animal_fitness)
+            return self.parameters['omega'] * (1 - self.animal_fitness)
 
     @property
     def probability_of_move(self):
+        """
+
+        :return: probability of animal movement depending on fitness
+        """
         return self.parameters['mu'] * self.animal_fitness
 
     @classmethod
     def set_parameters(cls, given_params):
+        """
+
+        :param given_params: a dictionary of user provided parameters
+        :return: Assigns the parameters to respective classes
+        """
         for param in given_params:
             if param in cls.parameters:
                 if given_params[param] <= 0:
@@ -109,8 +147,8 @@ class Carnivore(Fauna):
                   'xi': 1.1, 'omega': 0.9, 'F': 50.0,
                   'DeltaPhiMax': 10.0}
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, age=None, weight=None):
+        super().__init__(age, weight)
         self.parameters = Carnivore.parameters
 
     def probability_of_kill(self, herb):
@@ -132,6 +170,6 @@ class Herbivore(Fauna):
                   'xi': 1.2, 'omega': 0.4, 'F': 10.0}
 
     def __init__(self, age=None, weight=None):
-        super().__init__()
+        super().__init__(age, weight)
         self.parameters = Herbivore.parameters
 

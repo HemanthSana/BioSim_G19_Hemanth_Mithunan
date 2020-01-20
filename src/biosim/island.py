@@ -20,11 +20,6 @@ class Island:
     M for Mountain, J for Jungle, D for Desert
     """
     def __init__(self, island_map, ini_pop=None):
-        """
-
-        :param geo_multiline_string: Multiline String with characters
-        ex: O, S, M, J, D
-        """
         self.landscape_dict = {'O': Ocean,
                                'M': Mountain,
                                'D': Desert,
@@ -36,6 +31,12 @@ class Island:
         self.edge_condition(self.island_map)
         self.cell_type_map = self.create_array_with_landscape_objects()
         self.add_animals(ini_pop)
+
+    @property
+    def map_dimensions(self):
+        rows = self.cell_type_map.shape[0]
+        cols = self.cell_type_map.shape[1]
+        return rows, cols
 
     @staticmethod
     def string_to_np_array(map_str):
@@ -63,31 +64,50 @@ class Island:
                 cell_type_array[row][col] = self.landscape_dict[cell_type]
         return cell_type_array
 
-    # def adjacent_cells(self, map_array, x, y):
-    #     rows = map_array.shape[0]
-    #     cols = map_array.shape[1]
+    def adjacent_cells(self, hor, ver):
+        rows, cols = self.map_dimensions
+        adj_cell_list = []
+        if hor > 0:
+            adj_cell_list.append(self.cell_type_map[hor - 1, ver])
+        if hor + 1 < rows:
+            adj_cell_list.append(self.cell_type_map[hor + 1, ver])
+        if ver > 0:
+            adj_cell_list.append(self.cell_type_map[hor, ver - 1])
+        if ver + 1 < cols:
+            adj_cell_list.append(self.cell_type_map[hor, ver + 1])
+        return adj_cell_list
+
+    @staticmethod
+    def total_adj_cell_propensity(cells, animal):
+        total_propensity = 0
+        for cell in cells:
+            total_propensity += cell.propensity_to_move(animal)
+        return total_propensity
+
+    def add_animals(self, pop):
+        for animal_group in pop:
+            loc = list(animal_group['loc'])
+            animals = animal_group['pop']
+            for animal in animals:
+                species = animal['species']
+                age = animal['age']
+                weight = animal['weight']
+                species_class = self.fauna_dict[species]
+                animal_object = species_class(age, weight)
+                cell = self.cell_type_map[loc]
+                cell.add_animal(animal_object)
+
+    def total_animals_per_species(self, species):
+        num_animals = 0
+        rows, cols = self.map_dimensions
+        for hor in range(rows):
+            for ver in range(cols):
+                cell = self.cell_type_map[hor, ver]
+                num_animals += len(cell.fauna_list[species])
+        return num_animals
+
+    def update(self):
+        pass
 
 
-    def animal_migrates(self):
-        island_array = self.get_array_from_string()
-        horizontal = island_array[0]
-        vertical = island_array[1]
-        for x_cord in range(horizontal):
-            for y_cord in range(vertical):
-                current_cell = island_array[x_cord, y_cord]
-                for animal in current_cell.animal_list:
-                    if np.random.random() > animal.probability_of_move:
-                        adj_cells = [island_array[x_cord - 1, y_cord],
-                                     island_array[x_cord + 1, y_cord],
-                                     island_array[x_cord, y_cord - 1],
-                                     island_array[x_cord, y_cord + 1]]
-                        list_of_probabilities = [
-                            current_cell.move_probability
-                            (cell, adj_cells, animal)
-                            for cell in adj_cells]
-                        max_probable_index = list_of_probabilities.index(
-                            max(list_of_probabilities))
-                        max_probable_cell = adj_cells[max_probable_index]
 
-                        current_cell.remove_animal(animal)
-                        max_probable_cell.add_animal(animal)

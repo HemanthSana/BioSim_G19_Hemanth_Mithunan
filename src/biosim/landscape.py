@@ -8,9 +8,7 @@ animal list in each cell
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
-from biosim.fauna import *
-# from biosim.fauna import Herbivore
-# from biosim.fauna import Carnivore
+from biosim.fauna import Herbivore, Carnivore
 
 import math
 import operator
@@ -24,22 +22,34 @@ class Landscape:
     parameters = {}
     remaining_food = {}
 
-    def __init__(self, animals_list):
+    def __init__(self):
         """
 
         :param animals_list: list of animals in the cell
         """
         self.sorted_animal_fitness = {}
-        self.fauna_list = animals_list
-        # self.remaining_food = {}
+        self.fauna_list = {'Herbivore': [], 'Carnivore': []}
 
     def save_fitness(self, animals, species):
+        """
+        Updates fitness value
+        :param animals: dictionary
+        :param species: Herbivore or Carnivore
+        :return: fitness value
+        """
         animal_fitness = {}
         for animal in animals[species]:
             animal_fitness[animal] = animal.fitness
         self.sorted_animal_fitness[species] = animal_fitness
 
-    def order_by_fitness(self, to_sort_objects, species, reverse=True):
+    def order_by_fitness(self, species, to_sort_objects, reverse=True):
+        """
+
+        :param species:list of objects
+        :param to_sort_objects: string
+        :param reverse: boolean value
+        :return: Ordered value of fitness
+        """
         self.save_fitness(to_sort_objects, species)
         if reverse:
             self.sorted_animal_fitness[species] = dict(
@@ -51,6 +61,11 @@ class Landscape:
                        key=operator.itemgetter(1)))
 
     def food_type(self, animal):
+        """
+        returns relevant food remaining in cell (f_k)
+        :param animal: Fauna object
+        :return: amount of food available
+        """
         species = animal.__class__.__name__
         return self.remaining_food[species]
 
@@ -64,32 +79,53 @@ class Landscape:
                 animal.weight -= baby_animal * baby_animal.parameters['xi']
 
     def add_animal(self, animal):
+        """
+        Adds animal(object) to the species list of cell
+        :param animal: class object
+        :return: appends animal to list
+        """
         species = animal.__class__.__name__
         self.fauna_list[species].append(animal)
 
     def remove_animal(self, animal):
+        """
+        Removes animal(object) from list of same species for cell
+        :param animal: class object
+        :return: removes animal from list
+        """
         species = animal.__class__.__name__
         self.fauna_list[species].remove(animal)
 
     def relative_abundance_fodder(self, animal):
+        """
+        Used in calculating propensity to move (E_k)
+        :param animal: class object
+        :return: value of relative fodder abundance
+        """
         species = animal.__class__.__name__
         return self.food_type(animal) / ((len(self.fauna_list[species]) + 1)
                                          * animal.parameters['F'])
 
     def propensity_to_move(self, animal):
+        """
+        Returns Propensity to move from a cell to adjacent cell
+        :param animal: class object
+        :return: calculated value
+        """
         if isinstance(self, Mountain) or isinstance(self, Ocean):
             return 0
         else:
             return math.exp(animal.parameters['lambda'] *
                             self.relative_abundance_fodder(animal))
 
-    def move_probability(self, dest_cell, adj_cells, species):
-        # ToDo
-        # where to get cell information
-        propensity_sum = 0
-        for _ in adj_cells:
-            propensity_sum += self.move_propensity(dest_cell, species)
-        return self.move_propensity(dest_cell, species)/propensity_sum
+    def probability_move_to_cell(self, animal, total_propensity):
+        """
+
+        :param animal: class object
+        :param total_propensity: calculated value of total propensity
+        :return: floating point value of move probability
+        """
+        return self.propensity_to_move(animal) / total_propensity
 
     def herbivore_eats(self):
         self.order_by_fitness(self.fauna_list, 'Herbivore')
@@ -121,12 +157,13 @@ class Landscape:
         self.carnivore_eats()
 
     def update_animal_weight_age(self):
-        for animal in self.fauna_list:
-            animal.animal_grows()
+        for species in self.fauna_list:
+            for animal in self.fauna_list[species]:
+                animal.animal_grows()
 
     def animal_gives_birth(self):
         for animal in self.fauna_list:
-            if np.random.random() > animal.probability_of_birth:
+            if np.random.random() > animal.probability_of_birth(len(self.fauna_list)):
                 species = type(animal)
                 offspring = species()
                 animal.update_weight_after_birth(offspring)
@@ -135,6 +172,16 @@ class Landscape:
         for animal in self.fauna_list:
             if np.random.random() > animal.probability_of_death():
                 self.remove_animal(animal)
+
+    @property
+    def cell_fauna_count(self):
+        """
+        Returns count of fauna type as dictionary
+        :return: dict
+        """
+        herb_count = len(self.fauna_list['Herbivore'])
+        carn_count = len(self.fauna_list['Carnivore'])
+        return {'Herbivore': herb_count, 'Carnivore' : carn_count}
 
 
 class Jungle(Landscape):
@@ -146,9 +193,9 @@ class Jungle(Landscape):
     is_migratable = True
     parameters = {'f_max': 800.0}
 
-    def __init__(self, animals_list, given_params=None):
+    def __init__(self, given_params=None):
         # child class of Landscape
-        super().__init__(animals_list)
+        super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
         self.parameters = Jungle.parameters
@@ -179,9 +226,9 @@ class Savannah(Landscape):
     is_migratable = True
     parameters = {'f_max': 300.0, 'alpha': 0.3}
 
-    def __init__(self, animals_list, given_params=None):
+    def __init__(self, given_params=None):
         # child class of Landscape
-        super().__init__(animals_list)
+        super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
         self.parameters = Savannah.parameters
@@ -212,9 +259,9 @@ class Desert(Landscape):
     is_migratable = True
     remaining_food = {'Herbivore': 0}
 
-    def __init__(self, animals_list):
+    def __init__(self):
         # child class of Landscape
-        super().__init__(animals_list)
+        super().__init__()
         self.f_max = 0
         self.remaining_food['Herbivore'] = Desert.remaining_food['Herbivore']
         self.remaining_food['Carnivore'] = sum(herb.weight for herb in
@@ -230,11 +277,9 @@ class Mountain(Landscape):
     remaining_food = {'Herbivore': 0, 'Carnivore': 0}
     animals_list = {'Herbivore': [], 'Carnivore': []}
 
-    def __init__(self, animals_list=None):
+    def __init__(self):
         # child class of Landscape
-        super().__init__(animals_list)
-        if animals_list is not None:
-            raise ValueError('Animals cannot be in Mountain')
+        super().__init__()
         self.remaining_food['Herbivore'] = Mountain.remaining_food['Herbivore']
         self.remaining_food['Carnivore'] = Mountain.remaining_food['Carnivore']
         self.animals_list['Herbivore'] = Mountain.animals_list['Herbivore']
@@ -250,11 +295,9 @@ class Ocean(Landscape):
     remaining_food = {'Herbivore': 0, 'Carnivore': 0}
     animals_list = {'Herbivore': [], 'Carnivore': []}
 
-    def __init__(self, animals_list=None):
+    def __init__(self):
         # child class of Landscape
-        super().__init__(animals_list)
-        if animals_list is not None:
-            raise ValueError('Animals cannot be in Ocean')
+        super().__init__()
         self.remaining_food['Herbivore'] = Ocean.remaining_food['Herbivore']
         self.remaining_food['Carnivore'] = Ocean.remaining_food['Carnivore']
         self.animals_list['Herbivore'] = Ocean.animals_list['Herbivore']
