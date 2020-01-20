@@ -6,7 +6,6 @@ __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import math
-import numpy as np
 from random import gauss
 
 
@@ -17,6 +16,12 @@ class Fauna:
     parameters = {}
 
     def __init__(self, age=None, weight=None):
+        """
+        Constructor for base class
+        weight of the animal at birth is calculated accordingly
+        :param age: age is of type integer
+        :param weight: weight can be floating point value
+        """
         if age is None:
             self.age = 0
         else:
@@ -38,7 +43,7 @@ class Fauna:
 
     def increase_animal_weight(self, fodder_eaten):
         """
-
+        Calculates the increase in animal weight according to the food eaten
         :param fodder_eaten: Amount of fodder ate by animal in a year
         :return: amount of increase in weight
         """
@@ -46,7 +51,7 @@ class Fauna:
 
     def decrease_animal_weight(self, const):
         """
-
+        Every year weight of animal decreases by certain factor
         :param const: factor by which weight decreases every year(eta)
         :return: Reduced weight
         """
@@ -61,7 +66,7 @@ class Fauna:
 
     def animal_eats(self, food_eaten):
         """
-
+        Increases animal weight according to food eaten
         :param food_eaten: amount of food depends on species
         :return: increased weight
         """
@@ -70,7 +75,10 @@ class Fauna:
     @property
     def animal_fitness(self):
         """
-        Calculates and returns fitness value of animal
+        Calculates and returns fitness value of animal.
+        It is calculated by the formula given in instructions
+        Phi = q(-1, a, a_half, phi_age)*q(+1, w, w_half, phi_weight)
+        Uses parameters phi_age, a_half, phi_weight, w_half to calculate
         :return: fitness value
         """
         if self.weight > 0:
@@ -85,11 +93,13 @@ class Fauna:
 
     def probability_of_birth(self, num_animals):
         """
-
+        Probability by which animal gives birth is calculated
+        It should be calculated only if atleast 2 animals of same species are
+        in cell
         :param num_animals: Number of animals of same species in cell
         :return: floating point value of probability
         """
-        if num_animals > 1 and self.weight >= self.parameters['zeta'] * \
+        if num_animals >= 2 and self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
             return min(1, self.parameters['gamma'] * self.animal_fitness *
                        (num_animals - 1))
@@ -98,7 +108,7 @@ class Fauna:
 
     def update_weight_after_birth(self, offspring):
         """
-
+        Weight of the animal decreases xi times the weight of offspring
         :param offspring: object either Herbivore or Carnivore
         :return: decreased weight after birth
         """
@@ -107,8 +117,9 @@ class Fauna:
 
     def probability_of_death(self):
         """
-
-        :return: a floating point value depending on fitness
+        Death probability depends on the fitness of the animal
+        If the fitness is 0 probability is 1
+        :return: a floating point value
         """
         if self.animal_fitness == 0:
             return 1
@@ -119,14 +130,14 @@ class Fauna:
     def probability_of_move(self):
         """
 
-        :return: probability of animal movement depending on fitness
+        :return: probability value in floating point
         """
         return self.parameters['mu'] * self.animal_fitness
 
     @classmethod
     def set_parameters(cls, given_params):
         """
-
+        Sets the parameters given according to classes called
         :param given_params: a dictionary of user provided parameters
         :return: Assigns the parameters to respective classes
         """
@@ -141,6 +152,9 @@ class Fauna:
 
 
 class Carnivore(Fauna):
+    """
+    Child class of Fauna
+    """
     parameters = {'w_birth': 6.0, 'sigma_birth': 1.0, 'beta': 0.75,
                   'eta': 0.125, 'a_half': 60.0, 'phi_age': 0.4,
                   'w_half': 4.0, 'phi_weight': 0.4, 'mu': 0.4,
@@ -153,6 +167,14 @@ class Carnivore(Fauna):
         self.parameters = Carnivore.parameters
 
     def probability_of_kill(self, herb):
+        """
+        Returns the probability with which carnivore kills herbivore
+        If fitness of carnivore less than herbivore we return 0
+        If the difference in fitness is > 0 and < DeltaPhiMax then it is
+        calculated as Difference/ DeltaPhiMax
+        :param herb: Herbivore class object
+        :return:probability value
+        """
         if self.animal_fitness <= herb.animal_fitness:
             return 0
         elif 0 < self.animal_fitness - herb.animal_fitness < \
@@ -164,6 +186,9 @@ class Carnivore(Fauna):
 
 
 class Herbivore(Fauna):
+    """
+    Child class of Fauna
+    """
     parameters = {'w_birth': 8.0, 'sigma_birth': 1.5, 'beta': 0.9,
                   'eta': 0.05, 'a_half': 40.0, 'phi_age': 0.2,
                   'w_half': 10.0, 'phi_weight': 0.1, 'mu': 0.25,
