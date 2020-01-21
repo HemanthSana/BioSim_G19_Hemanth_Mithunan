@@ -17,7 +17,8 @@ import numpy as np
 
 class Landscape:
     """
-    Parent class for type of landscape
+    Parent class for type of landscapes Jungle, Savannah,
+    Mountain, Desert, Ocean
     """
     parameters = {}
     remaining_food = {}
@@ -40,27 +41,28 @@ class Landscape:
             animal_fitness[animal] = animal.fitness
         self.sorted_animal_fitness[species] = animal_fitness
 
-    def order_by_fitness(self, to_sort_objects, species, reverse=True):
+    def order_by_fitness(self, animal_objects, species_to_sort, reverse=True):
         """
-
-        :param species:list of objects
-        :param to_sort_objects: string
-        :param reverse: boolean value
-        :return: Ordered value of fitness
+        Sorts animal_objects according to the fitness
+        :param animal_objects: Dictionary
+        :param species_to_sort: str
+        :param reverse: bool
+        :return: Sorted animal fitnesses
         """
-        self.save_fitness(to_sort_objects, species)
+        self.save_fitness(animal_objects, species_to_sort)
         if reverse:
-            self.sorted_animal_fitness[species] = dict(
-                sorted(self.sorted_animal_fitness[species].items(),
+            self.sorted_animal_fitness[species_to_sort] = dict(
+                sorted(self.sorted_animal_fitness[species_to_sort].items(),
                        key=operator.itemgetter(1), reverse=True))
         else:
-            self.sorted_animal_fitness[species] = dict(
-                sorted(self.sorted_animal_fitness[species].items(),
+            self.sorted_animal_fitness[species_to_sort] = dict(
+                sorted(self.sorted_animal_fitness[species_to_sort].items(),
                        key=operator.itemgetter(1)))
 
     def food_type(self, animal):
         """
-        returns relevant food remaining in cell (f_k)
+        Returns relevant food remaining in cell (f_k)
+        This is different for Carnivores and Herbivores
         :param animal: Fauna object
         :return: amount of food available
         """
@@ -96,7 +98,9 @@ class Landscape:
 
     def relative_abundance_fodder(self, animal):
         """
-        Used in calculating propensity to move (E_k)
+        Calculates "Relative Abundance of Fodder" (E_k) by relevant fodder,
+        number of animals of same species and the F
+
         :param animal: class object
         :return: value of relative fodder abundance
         """
@@ -107,6 +111,7 @@ class Landscape:
     def propensity_to_move(self, animal):
         """
         Returns Propensity to move from a cell to adjacent cell
+        If the adjacent cell is Mountain or Landscape it returns 0
         :param animal: class object
         :return: calculated value
         """
@@ -118,7 +123,7 @@ class Landscape:
 
     def probability_move_to_cell(self, animal, total_propensity):
         """
-
+        Calculates the probability to move from one cell to another
         :param animal: class object
         :param total_propensity: calculated value of total propensity
         :return: floating point value of move probability
@@ -126,6 +131,17 @@ class Landscape:
         return self.propensity_to_move(animal) / total_propensity
 
     def herbivore_eats(self):
+        """
+        Herbivores eat according to their fitness. Animal with
+        highest fitness eats first
+        If there is no fodder available in cell animal doesnt eat
+        if the available fodder is greater than the food
+        required animal eats the required amount. We calculate the
+        remaining fodder in cell
+        if fodder available is less than food required animal eates
+        available food. And update remaining fodder as 0
+        :return:
+        """
         self.order_by_fitness(self.fauna_list, 'Herbivore')
         for herb in self.sorted_animal_fitness['Herbivore']:
             herb_remaining_fodder = self.remaining_food['Herbivore']
@@ -133,11 +149,19 @@ class Landscape:
                 break
             elif herb_remaining_fodder >= herb.parameters['F']:
                 herb.animal_eats(herb.parameters['F'])
+                self.remaining_food['Herbivore'] -= herb.parameters['F']
             elif 0 < herb_remaining_fodder < herb.parameters['F']:
                 herb.animal_eats(herb_remaining_fodder)
                 self.remaining_food['Herbivore'] = 0
 
     def carnivore_eats(self):
+        """
+        Carnivores with highest fitness eat first. Herbivores with least
+        fitness will be eaten first.
+        if there is enough weight for carnivore to eat it eats the
+        required food F, Else it eats food equal to weight of herbivores
+        :return:
+        """
         self.order_by_fitness(self.fauna_list, 'Carnivore')
         self.order_by_fitness(self.fauna_list, 'Herbivore', False)
         for carn in self.sorted_animal_fitness['Carnivore']:
@@ -150,6 +174,10 @@ class Landscape:
                             carn.animal_eats(herb.weight)
 
     def animal_eats(self):
+        """
+        Feeding the animals in the cell in the order
+        Grow the fodder, Herbivore eat fodder, Carnivore eats Herbivore
+        """
         self.update_fodder()
         self.herbivore_eats()
         self.carnivore_eats()
@@ -158,11 +186,21 @@ class Landscape:
         return
 
     def update_animal_weight_age(self):
+        """
+        Each year animal increases in age by 1 and loses weight by factor eta
+        :return:
+        """
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
                 animal.animal_grows()
 
     def animal_gives_birth(self):
+        """
+        Compare the probability_of_birth with random value generated
+        If its greater animal gives birth. Create offspring of same species
+        and decrease weight of animal
+        :return:
+        """
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
                 if np.random.random() > animal.probability_of_birth:
@@ -171,12 +209,23 @@ class Landscape:
                     animal.update_weight_after_birth(offspring)
 
     def animal_dies(self):
+        """
+        If generated random number is greater than probability_of_death
+        We remove the animal from dictionary
+        """
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
                 if np.random.random() > animal.probability_of_death:
                     self.remove_animal(animal)
 
     def animal_migrates(self, adj_cells):
+        """
+        We calculate the probability as propensity/sum of prpensity
+        for each adj cells. Animal migrates to the cell with highest
+        probability to move. We add the animal to the newly moved cell and
+        remove it from old cell.
+        :param adj_cells: List of 4 immediate adjacent cells
+        """
         for species, animals in self.fauna_list.items():
             for animal in animals:
                 if np.random.random() > animal.probability_of_move:
@@ -237,7 +286,10 @@ class Jungle(Landscape):
                 raise ValueError('Parameter not in list' + str(param))
 
     def update_fodder(self):
-        # There is no overgrazing in jungle cells
+        """
+        Updates the annual fodder. There is no overgrazing in Jungle so amount
+        of available fodder will be equal to f_max
+        """
         self.remaining_food['Herbivore'] = self.parameters['f_max']
 
 
@@ -251,7 +303,6 @@ class Savannah(Landscape):
     parameters = {'f_max': 300.0, 'alpha': 0.3}
 
     def __init__(self, given_params=None):
-        # child class of Landscape
         super().__init__()
         if given_params is not None:
             self.set_parameters(given_params)
@@ -270,9 +321,14 @@ class Savannah(Landscape):
                 raise ValueError('Parameter not in list' + str(param))
 
     def update_fodder(self):
-        self.remaining_food['Herbivore'] += self.parameters['alpha'] * \
-                                 (self.parameters['f_max'] -
-                                  self.remaining_food['Herbivore'])
+        """
+        Updates the fodder available in Savannah cells. Available fodder is
+        calculated by formula  available fodder = available fodder +
+        alpha(f_max - available fodder)
+        :return:
+        """
+        self.remaining_food['Herbivore'] += self.parameters['alpha'] * (
+                self.parameters['f_max'] - self.remaining_food['Herbivore'])
 
 
 class Desert(Landscape):

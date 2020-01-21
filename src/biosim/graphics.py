@@ -9,7 +9,6 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import numpy as np
 import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 
 
 class Graphics:
