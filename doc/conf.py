@@ -19,7 +19,7 @@ autoclass_content = 'both'
 
 # -- Project information -----------------------------------------------------
 
-project = 'BioSim_G19_Hemanth_Mithunan'
+project = 'BioSim Group 19'
 copyright = '2020, Hemanth Sana & Mithunan Sivagnanam'
 author = 'Hemanth Sana & Mithunan Sivagnanam'
 
