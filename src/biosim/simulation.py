@@ -16,10 +16,10 @@ import subprocess
 
 from biosim.island import Island
 from biosim.landscape import Ocean, Savannah, Desert, Jungle, Mountain
-from biosim.fauna import Herbivore, Carnivore
+from biosim.fauna import Carnivore, Herbivore
 from biosim.graphics import Graphics
 
-DEFAULT_GRAPHICS_DIR = os.path.join('../results', '')
+DEFAULT_GRAPHICS_DIR = os.path.join('./results/')
 DEFAULT_GRAPHICS_NAME = 'biosim'
 DEFAULT_MOVIE_FORMAT = 'mp4'
 
@@ -65,6 +65,23 @@ class BioSim:
         where img_no are consecutive image numbers starting from 0.
         img_base should contain a path and beginning of a file name.
         """
+        self.landscapes = {'O': Ocean,
+                           'S': Savannah,
+                           'M': Mountain,
+                           'J': Jungle,
+                           'D': Desert}
+        self.landscapes_with_parameters = [Savannah, Jungle]
+
+        self.animal_species = {'Carnivore': Carnivore, 'Herbivore': Herbivore}
+
+        for char in island_map.replace('\n', ''):
+            if char not in self.landscapes:
+                raise ValueError('This given string contains unknown '
+                                 'geographies')
+
+        lengths = [len(line) for line in island_map.splitlines()]
+        if len(set(lengths)) > 1:
+            raise ValueError('This given string is not uniform')
         self.island_map = island_map
         self._map = Island(island_map)
         np.random.seed(seed)
@@ -88,18 +105,9 @@ class BioSim:
         self.img_fmt = img_fmt
         self.img_counter = 0
 
-        self.animal_species = ['Carnivore', 'Herbivore']
-        self.landscapes = {'O': Ocean,
-                           'S': Savannah,
-                           'M': Mountain,
-                           'J': Jungle,
-                           'D': Desert}
-        self.landscape_with_parameters = [Savannah, Jungle]
         self.vis = None
         self._year = 0
         self.final_year = None
-
-        self.fig = None
 
     def set_animal_parameters(self, species, params):
         """
@@ -125,7 +133,7 @@ class BioSim:
         if landscape in self.landscapes:
             landscape_type = self.landscapes[landscape]
             if landscape_type in \
-                    self.landscape_with_parameters:
+                    self.landscapes_with_parameters:
                 landscape_type.set_parameters(params)
             else:
                 raise ValueError(landscape + ' parameter is not valid')
@@ -164,10 +172,10 @@ class BioSim:
     def setup_graphics(self):
         map_dims = self._map.map_dimensions
 
-        if self.fig is None:
-            self.fig = plt.figure()
-            self.vis = Graphics(self, self.island_map,
-                                self.fig, map_dims)
+        if self.vis is None:
+            fig = plt.figure()
+            self.vis = Graphics(self.island_map,
+                                fig, map_dims)
 
             self.vis.generate_island_graph()
             self.vis.generate_animal_graphs(self.final_year, self.ymax_animals)
@@ -178,15 +186,19 @@ class BioSim:
         """Updates graphics with current data."""
         df = self.animal_distribution
         rows, cols = self._map.map_dimensions
-        dist_matrix_carnivore = np.array(df[['carnivore']]).reshape(rows, cols)
-        dist_matrix_herbivore = np.array(df[['herbivore']]).reshape(rows, cols)
-        self.update_animals_graph()
+        dist_matrix_carnivore = np.array(df[['Carnivore']]).reshape(rows, cols)
+        dist_matrix_herbivore = np.array(df[['Herbivore']]).reshape(rows, cols)
+
+        # updates the line graphs
+        herb_count, carn_count = list(self.num_animals_per_species.values())
+        self.vis.update_graphs(self._year, herb_count, carn_count)
+
         self.vis.update_herbivore_dist(dist_matrix_herbivore,
                                        self.cmax_animals['Herbivore'])
         self.vis.update_carnivore_dist(dist_matrix_carnivore,
                                        self.cmax_animals['Carnivore'])
         plt.pause(1e-6)
-        self.fig.suptitle('Year: ' + str(self.year), x=0.1)
+        self.vis.set_year(self._year)
 
     def save_graphics(self):
         if self.img_base is None:
@@ -205,9 +217,37 @@ class BioSim:
         """
         self._map.add_animals(population)
 
-    def update_animals_graph(self):
-        herb_count, carn_count = list(self.num_animals_per_species.values())
-        self.vis.update_graphs(self._year, herb_count, carn_count)
+    def make_movie(self, movie_fmt=DEFAULT_MOVIE_FORMAT):
+        """Create MPEG4 movie from visualization images saved."""
+        if self.img_base is None:
+            raise RuntimeError('No filename defines')
+
+        if movie_fmt == 'mp4':
+            try:
+                subprocess.check_call([FFMPEG_BINARY,
+                                       '-i',
+                                       '{}_%05d.png'.format(self.img_base),
+                                       '-y',
+                                       '-profile:v', 'baseline',
+                                       '-level', '3.0',
+                                       '-pix_fmt', 'yuv420p',
+                                       '{}.{}'.format(self.img_base,
+                                                      movie_fmt)])
+            except subprocess.CalledProcessError as err:
+                raise RuntimeError('Error: ffmpeg failed with: {}'.format(err))
+        elif movie_fmt == 'gif':
+            try:
+                subprocess.check_call([CONVERT_BINARY,
+                                       '-delay', '1',
+                                       '-loop', '0',
+                                       '{}_*.png'.format(self.img_base),
+                                       '{}.{}'.format(self.img_base,
+                                                      movie_fmt)])
+            except subprocess.CalledProcessError as err:
+                raise RuntimeError(
+                    'Error: convert failed with: {}'.format(err))
+        else:
+            raise ValueError('Unknown movie format')
 
     @property
     def year(self):
@@ -241,39 +281,8 @@ class BioSim:
             for col in range(cols):
                 cell = self._map.cells[row, col]
                 animal_count = cell.cell_fauna_count
-                animal_df.append({'row': row, 'col': col,
-                                  'carnivores': animal_count['Carnivore'],
-                                  'herbivores': animal_count['Herbivore']})
+                animal_df.append({'Row': row, 'Col': col,
+                                  'Carnivore': animal_count['Carnivore'],
+                                  'Herbivore': animal_count['Herbivore']})
         return pd.DataFrame(animal_df)
 
-    def make_movie(self, movie_fmt=DEFAULT_MOVIE_FORMAT):
-        """Create MPEG4 movie from visualization images saved."""
-        if self.img_base is None:
-            raise RuntimeError('No filename defines')
-
-        if movie_fmt == 'mp4':
-            try:
-                subprocess.check_call([FFMPEG_BINARY,
-                                       '-i',
-                                       '{}_%05d.png'.format(self.img_base),
-                                       '-y',
-                                       '-profile:v', 'baseline',
-                                       '-level', '3.0',
-                                       '-pix_fmt', 'yuv420p',
-                                       '{}.{}'.format(self.img_base,
-                                                      movie_fmt)])
-            except subprocess.CalledProcessError as err:
-                raise RuntimeError('Error: ffmpeg failed with: {}'.format(err))
-        elif movie_fmt == 'gif':
-            try:
-                subprocess.check_call([CONVERT_BINARY,
-                                       '-delay', '1',
-                                       '-loop', '0',
-                                       '{}_*.png'.format(self.img_base),
-                                       '{}.{}'.format(self.img_base,
-                                                      movie_fmt)])
-            except subprocess.CalledProcessError as err:
-                raise RuntimeError(
-                    'Error: convert failed with: {}'.format(err))
-        else:
-            raise ValueError('Unknown movie format')

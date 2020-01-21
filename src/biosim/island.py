@@ -36,7 +36,7 @@ class Island:
     def cells(self):
         """
 
-        :return: Landscape objects 
+        :return: Landscape objects
         """
         return self._cells
 

@@ -9,14 +9,15 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import numpy as np
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 
 
 class Graphics:
     map_colors = {
         "O": mcolors.to_rgba("navy"),
         "J": mcolors.to_rgba("forestgreen"),
-        "S": mcolors.to_rgba("#e1ab62"),
-        "D": mcolors.to_rgba("salmon"),
+        "S": mcolors.to_rgba("springgreen"),
+        "D": mcolors.to_rgba("navajowhite"),
         "M": mcolors.to_rgba("lightslategrey"),
     }
     map_labels = {
@@ -27,11 +28,12 @@ class Graphics:
         "M": "Mountain",
     }
 
-    def __init__(self, map_layout, figure, horizontal, vertical):
+    def __init__(self, map_layout, figure, map_dims):
         self.map_layout = map_layout
         self.fig = figure
-        self.x_dir = horizontal
-        self.y_dir = vertical
+        # self.x_dir = horizontal
+        # self.y_dir = vertical
+        self.map_dims = map_dims
         self.map_colors = Graphics.map_colors
         self.map_graph = None
         self.herbivore_curve = None
@@ -73,8 +75,9 @@ class Graphics:
         """
         if self.map_graph is None:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
-            x = self.x_dir
-            y = self.y_dir
+            # x = self.x_dir
+            # y = self.y_dir
+            x, y = self.map_dims
             self.map_graph.imshow(self.generate_map_array())
             self.map_graph.set_xticks(range(0, x, 5))
             self.map_graph.set_xticklabels(range(0, x, 5))
@@ -120,6 +123,12 @@ class Graphics:
         self.carnivore_curve.set_ydata(carn_ydata)
 
     def generate_animal_graphs(self, final_year, y_lim):
+        """
+        Generates seperate lines for Herbivores and Carnivores
+        :param final_year: Final year of simulation
+        :param y_lim:
+        :return:
+        """
         if self.mean_ax is None:
             self.mean_ax = self.fig.add_subplot(2, 2, 2)
             self.mean_ax.set_ylim(0, y_lim)
@@ -133,15 +142,14 @@ class Graphics:
             self.herbivore_image_axis = None
 
         if self.carnivore_dist is None:
-            self.herbivore_dist = self.fig.add_subplot(2, 2, 4)
+            self.carnivore_dist = self.fig.add_subplot(2, 2, 4)
             self.carnivore_image_axis = None
 
     def update_herbivore_dist(self, distribution, v_max):
         if self.herbivore_image_axis is not None:
             self.herbivore_image_axis.set_data(distribution)
         else:
-            x = self.x_dir
-            y = self.y_dir
+            y, x = self.map_dims
             self.herbivore_dist.imshow(distribution,
                                        interpolation='nearest',
                                        vmin=0, vmax=v_max)
@@ -152,11 +160,16 @@ class Graphics:
             self.herbivore_dist.set_title('Herbivore Distribution')
 
     def update_carnivore_dist(self, distribution, v_max):
+        """
+        updates Carnivore distribution
+        :param distribution:
+        :param v_max:
+        :return:
+        """
         if self.carnivore_image_axis is not None:
             self.carnivore_image_axis.set_data(distribution)
         else:
-            x = self.x_dir
-            y = self.y_dir
+            y, x = self.map_dims
             self.carnivore_dist.imshow(distribution,
                                        interpolation='nearest',
                                        vmin=0, vmax=v_max)
@@ -165,3 +178,6 @@ class Graphics:
             self.carnivore_dist.set_yticks(range(0, y, 5))
             self.carnivore_dist.set_yticklabels(range(1, 1 + y, 5))
             self.carnivore_dist.set_title('Carnivore Distribution')
+
+    def set_year(self, year):
+        self.fig.suptitle('Year: ' + str(year), x=0.1)
