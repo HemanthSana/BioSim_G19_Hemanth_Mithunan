@@ -32,6 +32,10 @@ class Island:
 
         self._cells = self.create_array_with_landscape_objects()
 
+        rows = self._cells.shape[0]
+        cols = self._cells.shape[1]
+        self.map_dims = rows, cols
+
     @property
     def cells(self):
         """
@@ -39,16 +43,6 @@ class Island:
         :return: Landscape objects
         """
         return self._cells
-
-    @property
-    def map_dimensions(self):
-        """
-        Returns Number of Rows and Columns
-        :return: Integer values of rows and cols
-        """
-        rows = self._cells.shape[0]
-        cols = self._cells.shape[1]
-        return rows, cols
 
     def instantiate_cell(self, cell_letter):
         """
@@ -115,7 +109,7 @@ class Island:
         :param ver: Number of cols
         :return: List with the 4 adj cells
         """
-        rows, cols = self.map_dimensions
+        rows, cols = self.map_dims
         adj_cell_list = []
         if hor > 0:
             adj_cell_list.append(self._cells[hor - 1, ver])
@@ -151,7 +145,7 @@ class Island:
         :return:Number of animals
         """
         num_animals = 0
-        rows, cols = self.map_dimensions
+        rows, cols = self.map_dims
         for hor in range(rows):
             for ver in range(cols):
                 cell = self._cells[hor, ver]
@@ -163,10 +157,14 @@ class Island:
         This iterates through all the cells and performs life cycle events
         this should be called every year
         """
-        print('year')
-        for [_, _], cell in np.ndenumerate(self._cells):
-            cell.animals_eat()
-            cell.animal_gives_birth()
-            cell.animal_migrates()
-            cell.grow_all_animals()
-            cell.animal_dies()
+        print('New Year')
+        rows, cols = self.map_dims
+        for row in range(rows):
+            for col in range(cols):
+                if self._cells[row, col].is_migratable:
+                    self._cells[row, col].animal_eats()
+                    self._cells[row, col].animals_gives_birth()
+                    self._cells[row, col].animal_migrates(
+                        self.adjacent_cells(row, col))
+                    self._cells[row, col].grow_all_animals()
+                    self._cells[row, col].animal_dies()

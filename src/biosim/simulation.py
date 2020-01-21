@@ -19,7 +19,7 @@ from biosim.landscape import Ocean, Savannah, Desert, Jungle, Mountain
 from biosim.fauna import Carnivore, Herbivore
 from biosim.graphics import Graphics
 
-DEFAULT_GRAPHICS_DIR = os.path.join('./results/')
+DEFAULT_GRAPHICS_DIR = os.path.join('results/')
 DEFAULT_GRAPHICS_NAME = 'biosim'
 DEFAULT_MOVIE_FORMAT = 'mp4'
 
@@ -170,7 +170,7 @@ class BioSim:
             self._year += 1
 
     def setup_graphics(self):
-        map_dims = self._map.map_dimensions
+        map_dims = self._map.map_dims
 
         if self.vis is None:
             fig = plt.figure()
@@ -185,7 +185,7 @@ class BioSim:
     def update_graphics(self):
         """Updates graphics with current data."""
         df = self.animal_distribution
-        rows, cols = self._map.map_dimensions
+        rows, cols = self._map.map_dims
         dist_matrix_carnivore = np.array(df[['Carnivore']]).reshape(rows, cols)
         dist_matrix_herbivore = np.array(df[['Herbivore']]).reshape(rows, cols)
 
@@ -276,7 +276,7 @@ class BioSim:
         """Pandas DataFrame with animal count per species for each cell
         on island."""
         animal_df = []
-        rows, cols = self._map.map_dimensions
+        rows, cols = self._map.map_dims
         for row in range(rows):
             for col in range(cols):
                 cell = self._map.cells[row, col]
@@ -285,4 +285,3 @@ class BioSim:
                                   'Carnivore': animal_count['Carnivore'],
                                   'Herbivore': animal_count['Herbivore']})
         return pd.DataFrame(animal_df)
-

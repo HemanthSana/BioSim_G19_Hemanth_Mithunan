@@ -7,6 +7,7 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import math
 from random import gauss
+import numpy as np
 
 
 class Fauna:
@@ -27,11 +28,12 @@ class Fauna:
         else:
             self.age = age
         if weight is None:
-            self.weight = gauss(self.parameters['w_birth'],
-                                self.parameters['sigma_birth'])
+            self.weight = np.random.normal(self.parameters['w_birth'],
+                                           self.parameters['sigma_birth'])
         else:
             self.weight = weight
         self.fitness = 0
+        self.gives_birth = False
 
     @property
     def animal_weight(self):
@@ -114,6 +116,7 @@ class Fauna:
         """
         if self.weight > offspring.weight * offspring.parameters['xi']:
             self.weight -= offspring.weight * offspring.parameters['xi']
+        self.gives_birth = True
 
     def probability_of_death(self):
         """

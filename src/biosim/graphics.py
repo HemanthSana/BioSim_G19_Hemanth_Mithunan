@@ -9,7 +9,6 @@ __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import numpy as np
 import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 
 
 class Graphics:
@@ -114,6 +113,13 @@ class Graphics:
                 self.herbivore_curve.set_data(x_stack, y_stack)
 
     def update_graphs(self, year, herb_count, carn_count):
+        """
+        Updates graphs according to number of years and animals count
+        :param year: year number
+        :param herb_count: No of herbivores in that year
+        :param carn_count: No of carnivores in that year
+        :return: Updated graphs
+        """
         herb_ydata = self.herbivore_curve.get_ydata()
         herb_ydata[year] = herb_count
         self.herbivore_curve.set_ydata(herb_ydata)
