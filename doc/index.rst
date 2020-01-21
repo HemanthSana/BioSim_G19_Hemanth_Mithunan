@@ -3,9 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to BioSim_G19_Hemanth_Mithunan's documentation!
+Welcome to Group 19´s BioSim documentation!
 =======================================================
-This is a simulation of the ecosystem at Rossumøya
+This is the documentation for the January 2020 project in INF200 at NMBU:
+A simulation of the ecosystem at Rossumøya.
 
 .. toctree::
    :maxdepth: 2
