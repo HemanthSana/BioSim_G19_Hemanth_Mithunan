@@ -8,7 +8,6 @@ animal list in each cell
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
-from biosim.fauna import Herbivore, Carnivore
 
 import math
 import operator

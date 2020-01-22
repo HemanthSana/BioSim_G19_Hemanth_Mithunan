@@ -88,12 +88,12 @@ class BioSim:
         self.add_population(ini_pop)
 
         if ymax_animals is None:
-            self.ymax_animals = 16000
+            self.ymax_animals = 500
         else:
             self.ymax_animals = ymax_animals
 
         if cmax_animals is None:
-            self.cmax_animals = {'Herbivore': 10, 'Carnivore': 10}
+            self.cmax_animals = {'Herbivore': 5, 'Carnivore': 5}
         else:
             self.cmax_animals = cmax_animals
 
@@ -117,8 +117,9 @@ class BioSim:
         :param params: Dict with valid parameter specification for species
         """
         if species in self.animal_species:
-            species_type = eval(species)
-            species_type.set_parameters(params)
+            species_type = self.animal_species[species]
+            animal = species_type()
+            animal.set_parameters(params)
         else:
             raise TypeError(species + ' parameters can\'t be assigned, '
                                       'there is no such data type')

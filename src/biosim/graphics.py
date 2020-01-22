@@ -30,8 +30,6 @@ class Graphics:
     def __init__(self, map_layout, figure, map_dims):
         self.map_layout = map_layout
         self.fig = figure
-        # self.x_dir = horizontal
-        # self.y_dir = vertical
         self.map_dims = map_dims
         self.map_colors = Graphics.map_colors
         self.map_graph = None
@@ -39,7 +37,7 @@ class Graphics:
         self.carnivore_curve = None
         self.herbivore_dist = None
         self.carnivore_dist = None
-        self.mean_ax = None
+        self.animal_ax = None
         self.herbivore_image_axis = None
         self.carnivore_image_axis = None
 
@@ -74,8 +72,6 @@ class Graphics:
         """
         if self.map_graph is None:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
-            # x = self.x_dir
-            # y = self.y_dir
             x, y = self.map_dims
             self.map_graph.imshow(self.generate_map_array())
             self.map_graph.set_xticks(range(0, x, 5))
@@ -86,8 +82,8 @@ class Graphics:
 
     def generate_carnivore_graph(self, final_year):
         if self.carnivore_curve is None:
-            plot = self.mean_ax.plot(np.arange(0, final_year),
-                                     np.full(final_year, np.nan))
+            plot = self.animal_ax.plot(np.arange(0, final_year),
+                                       np.full(final_year, np.nan))
             self.carnivore_curve = plot[0]
         else:
             xdata, ydata = self.carnivore_curve.get_data()
@@ -100,8 +96,8 @@ class Graphics:
 
     def generate_herbivore_graph(self, final_year):
         if self.herbivore_curve is None:
-            plot = self.mean_ax.plot(np.arange(0, final_year),
-                                     np.full(final_year, np.nan))
+            plot = self.animal_ax.plot(np.arange(0, final_year),
+                                       np.full(final_year, np.nan))
             self.herbivore_curve = plot[0]
         else:
             x_data, y_data = self.herbivore_curve.get_data()
@@ -135,14 +131,19 @@ class Graphics:
         :param y_lim:
         :return:
         """
-        if self.mean_ax is None:
-            self.mean_ax = self.fig.add_subplot(2, 2, 2)
-            self.mean_ax.set_ylim(0, y_lim)
-        self.mean_ax.set_xlim(0, final_year + 1)
+        if self.animal_ax is None:
+            self.animal_ax = self.fig.add_subplot(2, 2, 2)
+            self.animal_ax.set_ylim(0, y_lim)
+        # TODO
+        # self.animal_ax.set_xlim(0, final_year + 1)
+        self.animal_ax.set_xlim(0, 2 * final_year)
         self.generate_herbivore_graph(final_year)
         self.generate_carnivore_graph(final_year)
 
     def animal_dist_graphs(self):
+        """
+        Creates the graphs for herbivore and carnivore distribution
+        """
         if self.herbivore_dist is None:
             self.herbivore_dist = self.fig.add_subplot(2, 2, 3)
             self.herbivore_image_axis = None
@@ -152,6 +153,12 @@ class Graphics:
             self.carnivore_image_axis = None
 
     def update_herbivore_dist(self, distribution, v_max):
+        """
+        Updates herbivore distribution in (2, 2, 3)
+        :param distribution:
+        :param v_max:
+        :return:
+        """
         if self.herbivore_image_axis is not None:
             self.herbivore_image_axis.set_data(distribution)
         else:

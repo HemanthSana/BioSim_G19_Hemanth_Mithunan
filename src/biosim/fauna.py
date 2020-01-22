@@ -6,7 +6,6 @@ __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import math
-from random import gauss
 import numpy as np
 
 
@@ -201,4 +200,3 @@ class Herbivore(Fauna):
     def __init__(self, age=None, weight=None):
         super().__init__(age, weight)
         self.parameters = Herbivore.parameters
-
