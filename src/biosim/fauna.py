@@ -98,14 +98,15 @@ class Fauna:
         It should be calculated only if atleast 2 animals of same species are
         in cell
         :param num_animals: Number of animals of same species in cell
-        :return: floating point value of probability
+        :return: Bool
         """
         if num_animals >= 2 and self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
-            return min(1, self.parameters['gamma'] * self.animal_fitness *
-                       (num_animals - 1))
+            return np.random.random() < min(1, self.parameters['gamma'] *
+                                            self.animal_fitness *
+                                            (num_animals - 1))
         else:
-            return 0
+            return False
 
     def update_weight_after_birth(self, offspring):
         """
@@ -124,9 +125,10 @@ class Fauna:
         :return: a floating point value
         """
         if self.animal_fitness == 0:
-            return 1
+            return False
         else:
-            return self.parameters['omega'] * (1 - self.animal_fitness)
+            return np.random.random() < self.parameters['omega'] * \
+                   (1 - self.animal_fitness)
 
     @property
     def probability_of_move(self):
@@ -134,7 +136,7 @@ class Fauna:
 
         :return: probability value in floating point
         """
-        return self.parameters['mu'] * self.animal_fitness
+        return np.random.random() < self.parameters['mu'] * self.animal_fitness
 
     @classmethod
     def set_parameters(cls, given_params):

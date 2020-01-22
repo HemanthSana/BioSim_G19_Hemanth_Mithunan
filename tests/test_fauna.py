@@ -14,32 +14,29 @@ import numpy as np
 
 
 class TestFauna:
-    def test_animal_grows(self):
-        """
+    @pytest.fixture
+    def animal_objects(self):
+        np.random.seed(123)
+        herb = Herbivore()
+        herb.set_parameters(Herbivore.parameters)
+        np.random.seed(123)
+        carn = Carnivore()
+        carn.set_parameters(Carnivore.parameters)
+        return herb, carn
 
-        :return: Pass if weight after the function call is decreased
+    def test_animal_birth_weight(self, animal_objects):
         """
-        seed(123)
-        herb = Herbivore(Herbivore.parameters)
-        seed(123)
-        carn = Carnivore(Carnivore.parameters)
-        herb_initial_weight = herb.weight
-        carn_initial_weight = carn.weight
-        herb.animal_grows()
-        carn.animal_grows()
-        herb_final_weight = herb.weight
-        carn_final_weight = carn.weight
-        assert herb_final_weight < herb_initial_weight
-        assert carn_final_weight < carn_initial_weight
+        Test if calculated weight is correctly calculated
+        """
+        herb, carn = animal_objects
+        assert herb.weight == 6.3715540950491585
+        assert carn.weight == 4.914369396699438
 
-    def test_age_increase(self):
+    def test_age_increase(self, animal_objects):
         """
-
-        :return: Pass if age increases by the as many times
-        animal_grows() function called
+        Testing increase in weight as animal grows
         """
-        herb = Herbivore(Herbivore.parameters)
-        carn = Carnivore(Carnivore.parameters)
+        herb, carn = animal_objects
         assert herb.age == 0
         assert carn.age == 0
         for _ in range(5):
@@ -49,32 +46,25 @@ class TestFauna:
         assert herb.age == 5
         assert carn.age == 4
 
-    def test_birth_weight(self):
+    def test_animal_growth_decrease_weight(self, animal_objects):
         """
+        Check if animal weight is decreased after growing
+        """
+        herb, carn = animal_objects
+        herb_initial_weight = herb.weight
+        carn_initial_weight = carn.weight
+        herb.animal_grows()
+        carn.animal_grows()
+        herb_final_weight = herb.weight
+        carn_final_weight = carn.weight
+        assert herb_final_weight < herb_initial_weight
+        assert carn_final_weight < carn_initial_weight
 
-        :return: pass if weight after calling the class is equal to
-        the calculated weight
+    def test_decrease_weight(self, animal_objects):
         """
-        seed(123)
-        herb = Herbivore(Herbivore.parameters)
-        seed(123)
-        carn = Carnivore(Carnivore.parameters)
-        assert herb.weight == np.random.normal(
-            Herbivore.parameters['w_birth'],
-            Herbivore.parameters['sigma_birth'])
-        assert carn.weight == np.random.normal(
-            Carnivore.parameters['w_birth'],
-            Carnivore.parameters['sigma_birth'])
-
-    def test_decrease_weight(self):
+        Test if animal weight is decreased by the factor given
         """
-
-        :return: Pass if weight after the function call is less by factor given
-        """
-        seed(123)
-        herb = Herbivore(Herbivore.parameters)
-        seed(123)
-        carn = Carnivore(Carnivore.parameters)
+        herb, carn = animal_objects
         herb_initial_weight = herb.weight
         carn_initial_weight = carn.weight
         herb.decrease_animal_weight(0.5)
@@ -84,15 +74,11 @@ class TestFauna:
         assert herb_final_weight == 0.5 * herb_initial_weight
         assert carn_final_weight == 0.5 * carn_initial_weight
 
-    def test_animal_eats(self):
+    def test_animal_eats_and_increase_weight(self, animal_objects):
         """
-
-        :return: Pass if weight after animal eats food is higher than before
+        Check if animal weight increases after eating
         """
-        seed(123)
-        herb = Herbivore(Herbivore.parameters)
-        seed(123)
-        carn = Carnivore(Carnivore.parameters)
+        herb, carn = animal_objects
         herb_initial_weight = herb.weight
         carn_initial_weight = carn.weight
         herb.animal_eats(10)
@@ -102,23 +88,23 @@ class TestFauna:
         assert herb_final_weight > herb_initial_weight
         assert carn_final_weight > carn_initial_weight
 
-    def test_animal_fitness_value(self):
+    def test_animal_fitness_value_between_0_and_1(self, animal_objects):
         """
-
-        :return: Pass if fitness value is calculated correctly
+        Check if fitness value is between 0 and 1
         """
-        seed(123)
-        herb = Herbivore(Herbivore.parameters)
-        seed(123)
-        carn = Carnivore(Carnivore.parameters)
+        herb, carn = animal_objects
         assert 0 <= herb.animal_fitness <= 1
         assert 0 <= carn.animal_fitness <= 1
 
-    def test_probability_of_move(self):
-        pass
+    def test_probability_of_birth_if_only_one_animal(self, animal_objects):
+        herb, carn = animal_objects
+        assert carn.probability_of_birth(1) is False
+        assert herb.probability_of_birth(1) is False
 
-    def test_probability_of_birth(self):
-        pass
+    def test_probability_of_move_for_more_than_2(self, animal_objects):
+        herb, carn = animal_objects
+        assert carn.probability_of_birth(20)
+        assert herb.probability_of_birth(30)
 
     def test_probability_of_death(self):
         pass
