@@ -20,14 +20,14 @@ class Landscape:
     Mountain, Desert, Ocean
     """
     parameters = {}
-    remaining_food = {}
 
     def __init__(self):
         """
         """
         self.sorted_animal_fitness = {}
         self.fauna_list = {'Herbivore': [], 'Carnivore': []}
-        self.offspring_fauna_list = {'Herbivore': [], 'Carnivore': []}
+        self.new_fauna_list = {'Herbivore': [], 'Carnivore': []}
+        self._remaining_food = {'Herbivore': 0, 'Carnivore': 0}
 
     def save_fitness(self, animals, species):
         """
@@ -41,25 +41,15 @@ class Landscape:
             animal_fitness[animal] = animal.fitness
         self.sorted_animal_fitness[species] = animal_fitness
 
-    def order_by_fitness(self, animal_objects, species_to_sort, reverse=True):
+    def order_by_fitness(self):
         """
         Sorts animal_objects according to the fitness
-        :param animal_objects: Dictionary
-        :param species_to_sort: str
-        :param reverse: bool
-        :return: Sorted animal fitnesses
         """
-        self.save_fitness(animal_objects, species_to_sort)
-        if reverse:
-            self.sorted_animal_fitness[species_to_sort] = dict(
-                sorted(self.sorted_animal_fitness[species_to_sort].items(),
-                       key=operator.itemgetter(1), reverse=True))
-        else:
-            self.sorted_animal_fitness[species_to_sort] = dict(
-                sorted(self.sorted_animal_fitness[species_to_sort].items(),
-                       key=operator.itemgetter(1)))
+        self.fauna_list['Herbivore'].sort(key=operator.attrgetter('fitness'))
+        self.fauna_list['Carnivore'].sort(key=operator.attrgetter('fitness'),
+                                          reverse=True)
 
-    def food_type(self, animal):
+    def relevant_food(self, animal):
         """
         Returns relevant food remaining in cell (f_k)
         This is different for Carnivores and Herbivores
@@ -68,15 +58,6 @@ class Landscape:
         """
         species = animal.__class__.__name__
         return self.remaining_food[species]
-
-    def give_birth(self, animal):
-        num_animals = len(self.fauna_list[animal.__class__.__name__])
-        if np.random.random() > animal.probability_of_birth(num_animals):
-            baby_animal = animal.__class__.__name__()
-            if animal.weight > (baby_animal.weight *
-                                baby_animal.parameters['xi']):
-                self.add_animal(baby_animal)
-                animal.weight -= baby_animal * baby_animal.parameters['xi']
 
     def add_animal(self, animal):
         """
@@ -105,7 +86,7 @@ class Landscape:
         :return: value of relative fodder abundance
         """
         species = animal.__class__.__name__
-        return self.food_type(animal) / ((len(self.fauna_list[species]) + 1)
+        return self.relevant_food(animal) / ((len(self.fauna_list[species]) + 1)
                                          * animal.parameters['F'])
 
     def propensity_to_move(self, animal):
@@ -130,6 +111,15 @@ class Landscape:
         """
         return self.propensity_to_move(animal) / total_propensity
 
+    def animal_eats(self):
+        """
+        Feeding the animals in the cell in the order
+        Grow the fodder, Herbivore eat fodder, Carnivore eats Herbivore
+        """
+        self.update_fodder()
+        self.herbivore_eats()
+        self.carnivore_eats()
+
     def herbivore_eats(self):
         """
         Herbivores eat according to their fitness. Animal with
@@ -142,8 +132,8 @@ class Landscape:
         available food. And update remaining fodder as 0
         :return:
         """
-        self.order_by_fitness(self.fauna_list, 'Herbivore')
-        for herb in self.sorted_animal_fitness['Herbivore']:
+        self.order_by_fitness()
+        for herb in self.fauna_list['Herbivore']:
             herb_remaining_fodder = self.remaining_food['Herbivore']
             if herb_remaining_fodder == 0:
                 break
@@ -162,25 +152,27 @@ class Landscape:
         required food F, Else it eats food equal to weight of herbivores
         :return:
         """
-        self.order_by_fitness(self.fauna_list, 'Carnivore')
-        self.order_by_fitness(self.fauna_list, 'Herbivore', False)
-        for carn in self.sorted_animal_fitness['Carnivore']:
-            if len(self.sorted_animal_fitness['Herbivore']) > 0:
-                for herb in self.sorted_animal_fitness['Herbivore']:
-                    if np.random.random() > carn.probability_of_kill(herb):
-                        if herb.weight >= carn.parameters['F']:
-                            carn.animal_eats(carn.parameters['F'])
-                        else:
-                            carn.animal_eats(herb.weight)
-
-    def animal_eats(self):
-        """
-        Feeding the animals in the cell in the order
-        Grow the fodder, Herbivore eat fodder, Carnivore eats Herbivore
-        """
-        self.update_fodder()
-        self.herbivore_eats()
-        self.carnivore_eats()
+        # print('inside carnivore eats')
+        # self.order_by_fitness(self.fauna_list, 'Carnivore')
+        # self.order_by_fitness(self.fauna_list, 'Herbivore', False)
+        self.order_by_fitness()
+        for carn in self.fauna_list['Carnivore']:
+            food_required = carn.parameters['F']
+            amount_to_eat = 0
+            not_eaten_animals = []
+            for i, herb in enumerate(self.fauna_list['Herbivore']):
+                if food_required <= amount_to_eat:
+                    not_eaten_animals.extend(self.fauna_list['Herbivore'][i:])
+                    break
+                elif np.random.random() < carn.probability_of_kill(herb):
+                    if food_required - amount_to_eat < herb.weight:
+                        amount_to_eat += herb.weight
+                    elif food_required - amount_to_eat > herb.weight:
+                        amount_to_eat += food_required - amount_to_eat
+                else:
+                    not_eaten_animals.append(herb)
+            carn.animal_eats(amount_to_eat)
+            self.fauna_list['Herbivore'] = not_eaten_animals
 
     def update_fodder(self):
         pass
@@ -201,24 +193,26 @@ class Landscape:
         and decrease weight of animal
         :return:
         """
-        for species, animals in self.fauna_list.items():
-            for i in range(math.floor(len(animals)/2)):
+        self.new_fauna_list = self.fauna_list
+        for species, animals in self.new_fauna_list.items():
+            for i in range(math.floor(len(self.new_fauna_list[species])/2)):
                 animal = animals[i]
                 if animal.probability_of_birth(len(animals)):
                     offspring_species = animal.__class__
                     offspring = offspring_species()
                     animal.update_weight_after_birth(offspring)
                     if animal.gives_birth:
-                        self.offspring_fauna_list[species].append(offspring)
+                        self.fauna_list[species].append(offspring)
+                        animal.gives_birth = False
 
     def animal_dies(self):
         """
         If generated random number is greater than probability_of_death
         We remove the animal from dictionary
         """
-        for species in self.fauna_list:
-            for animal in self.fauna_list[species]:
-                if animal.probability_of_death:
+        for species, animals in self.fauna_list.items():
+            for animal in animals:
+                if animal.probability_of_death():
                     self.remove_animal(animal)
 
     def animal_migrates(self, adj_cells):
@@ -266,6 +260,22 @@ class Landscape:
         herb_count = len(self.fauna_list['Herbivore'])
         carn_count = len(self.fauna_list['Carnivore'])
         return {'Herbivore': herb_count, 'Carnivore': carn_count}
+
+    @property
+    def total_herb_weight(self):
+        return sum(herb.weight for herb in self.fauna_list['Herbivore'])
+
+    @property
+    def remaining_food(self):
+        if isinstance(self, (Ocean, Mountain)):
+            raise ValueError('There are no fodder available in this cell')
+        elif isinstance(self, Desert):
+            self._remaining_food = {'Herbivore': 0,
+                                   'Carnivore': self.total_herb_weight}
+        else:
+            self._remaining_food = {'Herbivore': self.parameters['f_max'],
+                                   'Carnivore': self.total_herb_weight}
+        return self._remaining_food
 
 
 class Jungle(Landscape):

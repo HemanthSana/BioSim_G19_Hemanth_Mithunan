@@ -8,6 +8,7 @@ __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
 
 import os
+import random
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -84,11 +85,11 @@ class BioSim:
             raise ValueError('This given string is not uniform')
         self.island_map = island_map
         self._map = Island(island_map)
-        np.random.seed(seed)
+        random.seed(seed)
         self.add_population(ini_pop)
 
         if ymax_animals is None:
-            self.ymax_animals = 500
+            self.ymax_animals = 1000
         else:
             self.ymax_animals = ymax_animals
 
@@ -170,6 +171,9 @@ class BioSim:
             self._map.life_cycle()
             self._year += 1
 
+            # df = self.animal_distribution
+            # df.to_csv('results/data.csv', sep='\t', encoding='utf-8')
+
     def setup_graphics(self):
         """
         Setup the graphics
@@ -199,10 +203,8 @@ class BioSim:
         herb_count, carn_count = list(self.num_animals_per_species.values())
         self.vis.update_graphs(self._year, herb_count, carn_count)
 
-        self.vis.update_herbivore_dist(dist_matrix_herbivore,
-                                       self.cmax_animals['Herbivore'])
-        self.vis.update_carnivore_dist(dist_matrix_carnivore,
-                                       self.cmax_animals['Carnivore'])
+        self.vis.update_herbivore_dist(dist_matrix_herbivore)
+        self.vis.update_carnivore_dist(dist_matrix_carnivore)
         plt.pause(1e-6)
         self.vis.set_year(self._year)
 
@@ -291,6 +293,6 @@ class BioSim:
                 cell = self._map.cells[row, col]
                 animal_count = cell.cell_fauna_count
                 animal_df.append({'Row': row, 'Col': col,
-                                  'Carnivore': animal_count['Carnivore'],
-                                  'Herbivore': animal_count['Herbivore']})
+                                  'Herbivore': animal_count['Herbivore'],
+                                  'Carnivore': animal_count['Carnivore']})
         return pd.DataFrame(animal_df)
