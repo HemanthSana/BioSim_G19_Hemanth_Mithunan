@@ -249,6 +249,10 @@ class Landscape:
                             self.remove_animal(animal)
 
     def grow_all_animals(self):
+        """
+        Growing all animals
+        :return:
+        """
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
                 animal.animal_grows()

@@ -171,6 +171,9 @@ class BioSim:
             self._year += 1
 
     def setup_graphics(self):
+        """
+        Setup the graphics
+        """
         map_dims = self._map.map_dims
 
         if self.vis is None:
@@ -184,7 +187,9 @@ class BioSim:
             self.vis.animal_dist_graphs()
 
     def update_graphics(self):
-        """Updates graphics with current data."""
+        """
+        Updates graphics with current data.
+        """
         df = self.animal_distribution
         rows, cols = self._map.map_dims
         dist_matrix_carnivore = np.array(df[['Carnivore']]).reshape(rows, cols)
@@ -202,6 +207,9 @@ class BioSim:
         self.vis.set_year(self._year)
 
     def save_graphics(self):
+        """
+        Save the graphics
+        """
         if self.img_base is None:
             return
 

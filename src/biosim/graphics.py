@@ -81,6 +81,10 @@ class Graphics:
             self.map_graph.set_title('Island')
 
     def generate_carnivore_graph(self, final_year):
+        """
+        Generating a graph for carnivores quantity
+        :param final_year: Final year in simulation
+        """
         if self.carnivore_curve is None:
             plot = self.animal_ax.plot(np.arange(0, final_year),
                                        np.full(final_year, np.nan))
@@ -95,6 +99,10 @@ class Graphics:
                 self.carnivore_curve.set_data(x_stack, y_stack)
 
     def generate_herbivore_graph(self, final_year):
+        """
+        Generating a graph for herbivores quantity
+        :param final_year: Final year in simulation
+        """
         if self.herbivore_curve is None:
             plot = self.animal_ax.plot(np.arange(0, final_year),
                                        np.full(final_year, np.nan))
@@ -193,4 +201,8 @@ class Graphics:
             self.carnivore_dist.set_title('Carnivore Distribution')
 
     def set_year(self, year):
+        """
+        Set the year
+        :param year:
+        """
         self.fig.suptitle('Year: ' + str(year), x=0.1)
