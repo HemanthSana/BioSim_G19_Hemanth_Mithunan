@@ -175,8 +175,8 @@ class BioSim:
             self._map.life_cycle()
             self._year += 1
 
-            # df = self.animal_distribution
-            # df.to_csv('results/data.csv', sep='\t', encoding='utf-8')
+            df = self.animal_distribution
+            df.to_csv('results/data.csv', sep='\t', encoding='utf-8')
 
     def setup_graphics(self):
         """

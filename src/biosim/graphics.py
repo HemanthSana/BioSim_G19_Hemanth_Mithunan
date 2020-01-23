@@ -72,10 +72,6 @@ class Graphics:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
             x, y = self.map_dims
             self.map_graph.imshow(self.generate_map())
-            # self.map_graph.set_xticks(range(0, x, 5))
-            # self.map_graph.set_xticklabels(range(1, x + 1, 5))
-            # self.map_graph.set_yticks(range(0, y, 5))
-            # self.map_graph.set_yticklabels(range(1, y + 1, 5))
             self.map_graph.set_title('Island')
 
     def generate_herbivore_graph(self, final_year, recreate=False):
