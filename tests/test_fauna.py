@@ -120,8 +120,8 @@ class TestFauna:
         herb, carn = animal_objects
         carn.set_parameters({'mu': 100})
         herb.set_parameters({'mu': 0.0001})
-        assert carn.probability_of_death()
-        assert not herb.probability_of_death()
+        assert carn.probability_of_death
+        assert not herb.probability_of_death
 
     def test_probability_of_move(self, animal_objects):
         """
@@ -167,6 +167,6 @@ class TestCarnivore(TestFauna):
 
         """
         np.random.seed(123)
-        carn = Carnivore(weight=10)
+        carn = Carnivore(weight=0)
         herb = Herbivore(weight=100)
         assert not carn.probability_of_kill(herb)

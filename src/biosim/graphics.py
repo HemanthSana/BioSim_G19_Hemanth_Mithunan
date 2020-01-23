@@ -70,7 +70,6 @@ class Graphics:
         """
         if self.map_graph is None:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
-            x, y = self.map_dims
             self.map_graph.imshow(self.generate_map())
             self.map_graph.set_title('Island')
 

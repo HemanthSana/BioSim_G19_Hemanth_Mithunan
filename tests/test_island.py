@@ -6,14 +6,11 @@ Tests for landscape.py
 
 __author__ = "Hemanth Sana & Mithunan Sivagnanam"
 __email__ = "hesa@nmbu.no & misi@nmbu.no"
-from random import seed
 
 import pytest
 
-from biosim.landscape import Desert, Ocean, Mountain, Savannah, Jungle
-from biosim.fauna import Herbivore, Carnivore
+from biosim.landscape import Ocean, Mountain
 from biosim.island import Island
-import numpy as np
 
 
 class TestIsland:
@@ -63,7 +60,7 @@ class TestIsland:
                         OMSOOOOOSMMO
                         OOOOOOOOOOOO"""
         with pytest.raises(ValueError) as err:
-            island = Island(map_str)
+            Island(map_str)
             assert err.type is ValueError
 
     def test_add_animals(self):
