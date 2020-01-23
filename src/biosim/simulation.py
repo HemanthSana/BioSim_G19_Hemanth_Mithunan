@@ -89,7 +89,7 @@ class BioSim:
         self.add_population(ini_pop)
 
         if ymax_animals is None:
-            self.ymax_animals = 5000
+            self.ymax_animals = 20000
         else:
             self.ymax_animals = ymax_animals
 
@@ -160,6 +160,10 @@ class BioSim:
 
         self.final_year = self._year + num_years
         self.setup_graphics()
+        if self._year > 1:
+            self.vis.generate_animal_graphs(self.final_year,
+                                            self.ymax_animals,
+                                            recreate=True)
 
         while self._year < self.final_year:
             if self._year % vis_years == 0:

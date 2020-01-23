@@ -78,11 +78,11 @@ class Graphics:
             self.map_graph.set_yticklabels(range(1, y + 1, 5))
             self.map_graph.set_title('Island')
 
-    def generate_herbivore_graph(self, final_year):
+    def generate_herbivore_graph(self, final_year, recreate=False):
         """
         Generates a line graph for herbivores
         """
-        if self.herbivore_curve is None:
+        if (self.herbivore_curve is None) or recreate:
             plot = self.mean_ax.plot(np.arange(0, final_year),
                                      np.full(final_year, np.nan))
             self.herbivore_curve = plot[0]
@@ -94,11 +94,11 @@ class Graphics:
                 self.herbivore_curve.set_data(np.hstack((x_data, x_new)),
                                               np.hstack((y_data, y_new)))
 
-    def generate_carnivore_graph(self, final_year):
+    def generate_carnivore_graph(self, final_year, recreate=False):
         """
         Generates a line graph for carnivores
         """
-        if self.carnivore_curve is None:
+        if (self.carnivore_curve is None) or recreate:
             plot = self.mean_ax.plot(np.arange(0, final_year),
                                      np.full(final_year, np.nan))
             self.carnivore_curve = plot[0]
@@ -123,7 +123,7 @@ class Graphics:
         carn_ydata[year] = carn_count
         self.carnivore_curve.set_ydata(carn_ydata)
 
-    def generate_animal_graphs(self, final_year, y_lim):
+    def generate_animal_graphs(self, final_year, y_lim, recreate=False):
         """
         Generates separate line graphs for Herbivores and Carnivores
         """
@@ -132,8 +132,8 @@ class Graphics:
             self.mean_ax.set_ylim(0, y_lim)
 
         self.mean_ax.set_xlim(0, final_year + 1)
-        self.generate_herbivore_graph(final_year)
-        self.generate_carnivore_graph(final_year)
+        self.generate_herbivore_graph(final_year, recreate=recreate)
+        self.generate_carnivore_graph(final_year, recreate=recreate)
 
     def animal_dist_graphs(self):
         """
