@@ -169,7 +169,7 @@ class BioSim:
             if self._year % vis_years == 0:
                 self.update_graphics()
 
-            if self._year % img_years == 0:
+            if (self._year + 1) % img_years == 0:
                 self.save_graphics()
 
             self._map.life_cycle()

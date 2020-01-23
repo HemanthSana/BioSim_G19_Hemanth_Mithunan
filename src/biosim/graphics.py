@@ -72,10 +72,10 @@ class Graphics:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
             x, y = self.map_dims
             self.map_graph.imshow(self.generate_map())
-            self.map_graph.set_xticks(range(0, x, 5))
-            self.map_graph.set_xticklabels(range(1, x + 1, 5))
-            self.map_graph.set_yticks(range(0, y, 5))
-            self.map_graph.set_yticklabels(range(1, y + 1, 5))
+            # self.map_graph.set_xticks(range(0, x, 5))
+            # self.map_graph.set_xticklabels(range(1, x + 1, 5))
+            # self.map_graph.set_yticks(range(0, y, 5))
+            # self.map_graph.set_yticklabels(range(1, y + 1, 5))
             self.map_graph.set_title('Island')
 
     def generate_herbivore_graph(self, final_year, recreate=False):
@@ -134,6 +134,7 @@ class Graphics:
         self.mean_ax.set_xlim(0, final_year + 1)
         self.generate_herbivore_graph(final_year, recreate=recreate)
         self.generate_carnivore_graph(final_year, recreate=recreate)
+        self.mean_ax.set_title('Animal Graphs')
 
     def animal_dist_graphs(self):
         """

@@ -88,8 +88,8 @@ class Landscape:
         :return: value of relative fodder abundance
         """
         species = animal.__class__.__name__
-        return self.relevant_food(animal) / ((len(self.fauna_list[species]) + 1)
-                                         * animal.parameters['F'])
+        return self.relevant_food(animal) / (
+                (len(self.fauna_list[species]) + 1) * animal.parameters['F'])
 
     def propensity_to_move(self, animal):
         """
@@ -154,9 +154,6 @@ class Landscape:
         required food F, Else it eats food equal to weight of herbivores
         :return:
         """
-        # print('inside carnivore eats')
-        # self.order_by_fitness(self.fauna_list, 'Carnivore')
-        # self.order_by_fitness(self.fauna_list, 'Herbivore', False)
         self.order_by_fitness()
         for carn in self.fauna_list['Carnivore']:
             food_required = carn.parameters['F']
@@ -195,7 +192,6 @@ class Landscape:
         and decrease weight of animal
         :return:
         """
-        self.new_fauna_list = self.fauna_list
         for species, animals in self.new_fauna_list.items():
             for i in range(math.floor(len(self.new_fauna_list[species])/2)):
                 animal = animals[i]
@@ -206,6 +202,15 @@ class Landscape:
                     if animal.gives_birth:
                         self.fauna_list[species].append(offspring)
                         animal.gives_birth = False
+
+    def add_offspring_to_adult_animals(self):
+        """
+        After the breeding stage, the new babies are added to the cell
+        animals dictionary and remove it from the baby fauna dictionary.
+        adult_fauna as input to calculate the giving birth probability.
+        """
+
+        self.new_fauna_list = self.fauna_list
 
     def animal_dies(self):
         """

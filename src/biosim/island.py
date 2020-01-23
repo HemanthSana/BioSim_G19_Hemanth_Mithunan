@@ -154,6 +154,7 @@ class Island:
                 if self._cells[row, col].is_migratable:
                     self._cells[row, col].animal_eats()
                     self._cells[row, col].animals_gives_birth()
+                    self._cells[row, col].add_offspring_to_adult_animals()
                     self._cells[row, col].animal_migrates(
                         self.adjacent_cells(row, col))
                     self._cells[row, col].grow_all_animals()
