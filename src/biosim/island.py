@@ -19,7 +19,8 @@ class Island:
     This is to represent the given map string as a array of objects
     """
     def __init__(self, island_map):
-        self.island_map = self.string_to_np_array(island_map)
+        self.map = island_map
+        self.island_map = self.string_to_array()
         self.check_surrounded_by_ocean(self.island_map)
 
         self.landscape_dict = {'O': Ocean,
@@ -44,23 +45,12 @@ class Island:
         """
         return self._cells
 
-    def instantiate_cell(self, cell_letter):
-        """
-        Creates a class object according to the letter using the dictionary
-        landscape_dict
-        :param cell_letter: J, S, M, D, O
-        :return: Object to respective classes
-        """
-        return self.landscape_dict[cell_letter]()
-
-    @staticmethod
-    def string_to_np_array(map_str):
+    def string_to_array(self):
         """
         This is to get a numpy array from the given multidimensional string
-        :param map_str: A multidimensional string
         :return: Numpy array
         """
-        map_str_clean = map_str.replace(' ', '')
+        map_str_clean = self.map.replace(' ', '')
         char_map = np.array(
             [[col for col in row] for row in map_str_clean.splitlines()])
         return char_map
@@ -92,14 +82,14 @@ class Island:
     def create_array_with_landscape_objects(self):
         """
         To create an array of same size of the map but with
-        objects of the classes
+        objects of the classes according to the Cell letter
         :return: Array with landscape objects
         """
         cell_type_array = np.empty(self.island_map.shape, dtype=object)
         for row in np.arange(self.island_map.shape[0]):
             for col in np.arange(self.island_map.shape[1]):
                 cell_type = self.island_map[row][col]
-                cell_type_array[row][col] = self.instantiate_cell(cell_type)
+                cell_type_array[row][col] = self.landscape_dict[cell_type]()
         return cell_type_array
 
     def adjacent_cells(self, hor, ver):

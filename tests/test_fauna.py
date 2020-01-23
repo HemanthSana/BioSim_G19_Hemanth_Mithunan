@@ -97,25 +97,76 @@ class TestFauna:
         assert 0 <= carn.animal_fitness <= 1
 
     def test_probability_of_birth_if_only_one_animal(self, animal_objects):
+        """
+        Testing probability of birth returns False when only
+        one animal is present
+        """
         herb, carn = animal_objects
         assert carn.probability_of_birth(1) is False
         assert herb.probability_of_birth(1) is False
 
-    def test_probability_of_move_for_more_than_2(self, animal_objects):
+    def test_probability_of_birth_for_more_than_2(self, animal_objects):
         herb, carn = animal_objects
-        assert carn.probability_of_birth(20)
-        assert herb.probability_of_birth(30)
+        np.random.seed(123)
+        carn.set_parameters({'gamma': 1000})
+        herb.set_parameters({'gamma': 0.000001})
+        assert carn.probability_of_birth(20) is True
+        assert herb.probability_of_birth(30) is True
 
-    def test_probability_of_death(self):
-        pass
+    def test_probability_of_death(self, animal_objects):
+        """
+        testing probability of death by manipulating the value of mu
+        """
+        herb, carn = animal_objects
+        carn.set_parameters({'mu': 100})
+        herb.set_parameters({'mu': 0.0001})
+        assert carn.probability_of_death()
+        assert not herb.probability_of_death()
 
-    def test_set_parameters(self):
-        pass
+    def test_probability_of_move(self, animal_objects):
+        """
+        Testing by setiing mu higher so that probability_of_move
+        will return True
+        """
+        herb, carn = animal_objects
+        assert not herb.probability_of_move
+        carn.set_parameters({'mu': 100})
+        assert carn.probability_of_move
+
+    def test_set_parameters(self, animal_objects):
+        """
+        testing set_parameters method by changing the parameters and comparing
+        before and after set values
+        """
+        herb, carn = animal_objects
+        eta_before_set = Herbivore.parameters['eta']
+        xi_before_set = Carnivore.parameters['xi']
+        herb_param = {'eta': 0.4}
+        carn_param = {'xi': 1.1}
+        herb.set_parameters(herb_param)
+        carn.set_parameters(carn_param)
+        assert eta_before_set != herb.parameters['eta']
+        assert xi_before_set == carn.parameters['xi']
 
 
 class TestHerbivore:
+    """
+    Tests for Herbivore class
+    """
     pass
 
 
-class TestCarnivore:
-    pass
+class TestCarnivore(TestFauna):
+    """
+    Tests for Carnivore class
+    """
+    def test_kill_probability(self, animal_objects):
+        """
+        The given weights shows that the herb is more fit than the carn.
+        so, the probability should be false.
+
+        """
+        np.random.seed(123)
+        carn = Carnivore(weight=10)
+        herb = Herbivore(weight=100)
+        assert not carn.probability_of_kill(herb)

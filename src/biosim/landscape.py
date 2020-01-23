@@ -45,8 +45,10 @@ class Landscape:
         """
         Sorts animal_objects according to the fitness
         """
-        self.fauna_list['Herbivore'].sort(key=operator.attrgetter('fitness'))
-        self.fauna_list['Carnivore'].sort(key=operator.attrgetter('fitness'),
+        self.fauna_list['Herbivore'].sort(key=operator.
+                                          attrgetter('animal_fitness'))
+        self.fauna_list['Carnivore'].sort(key=operator.
+                                          attrgetter('animal_fitness'),
                                           reverse=True)
 
     def relevant_food(self, animal):

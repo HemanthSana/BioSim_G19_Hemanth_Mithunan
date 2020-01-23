@@ -43,8 +43,7 @@ class Graphics:
 
     def generate_map(self):
         """
-        Change the string to rgb image array
-        :return: array
+        Change the string to image array
         """
         lines = self.map_layout.splitlines()
         if len(lines[-1]) == 0:
@@ -67,8 +66,7 @@ class Graphics:
 
     def generate_island_graph(self):
         """
-        create a map for island
-        :return:
+        Generates a map for island in subplot (2, 2, 1)
         """
         if self.map_graph is None:
             self.map_graph = self.fig.add_subplot(2, 2, 1)
@@ -82,8 +80,7 @@ class Graphics:
 
     def generate_herbivore_graph(self, final_year):
         """
-        Generating a graph for herbivores quantity
-        :param final_year: Final year in simulation
+        Generates a line graph for herbivores
         """
         if self.herbivore_curve is None:
             plot = self.mean_ax.plot(np.arange(0, final_year),
@@ -94,35 +91,29 @@ class Graphics:
             x_new = np.arange(x_data[-1] + 1, final_year)
             if len(x_new) > 0:
                 y_new = np.full(x_new.shape, np.nan)
-                x_stack = np.hstack((x_data, x_new))
-                y_stack = np.hstack((y_data, y_new))
-                self.herbivore_curve.set_data(x_stack, y_stack)
+                self.herbivore_curve.set_data(np.hstack((x_data, x_new)),
+                                              np.hstack((y_data, y_new)))
 
     def generate_carnivore_graph(self, final_year):
         """
-        Generating a graph for carnivores quantity
-        :param final_year: Final year in simulation
+        Generates a line graph for carnivores
         """
         if self.carnivore_curve is None:
             plot = self.mean_ax.plot(np.arange(0, final_year),
                                      np.full(final_year, np.nan))
             self.carnivore_curve = plot[0]
         else:
-            xdata, ydata = self.carnivore_curve.get_data()
-            xnew = np.arange(xdata[-1] + 1, final_year)
-            if len(xnew) > 0:
-                ynew = np.full(xnew.shape, np.nan)
-                x_stack = np.hstack((xdata, xnew))
-                y_stack = np.hstack((ydata, ynew))
-                self.carnivore_curve.set_data(x_stack, y_stack)
+            x_data, y_data = self.carnivore_curve.get_data()
+            x_new = np.arange(x_data[-1] + 1, final_year)
+            if len(x_new) > 0:
+                y_new = np.full(x_new.shape, np.nan)
+                self.carnivore_curve.set_data(np.hstack((x_data, x_new)),
+                                              np.hstack((y_data, y_new)))
 
     def update_graphs(self, year, herb_count, carn_count):
         """
         Updates graphs according to number of years and animals count
-        :param year: year number
-        :param herb_count: No of herbivores in that year
-        :param carn_count: No of carnivores in that year
-        :return: Updated graphs
+        in subplot(2, 2, 2)
         """
         herb_ydata = self.herbivore_curve.get_ydata()
         herb_ydata[year] = herb_count
@@ -134,10 +125,7 @@ class Graphics:
 
     def generate_animal_graphs(self, final_year, y_lim):
         """
-        Generates seperate lines for Herbivores and Carnivores
-        :param final_year: Final year of simulation
-        :param y_lim:
-        :return:
+        Generates separate line graphs for Herbivores and Carnivores
         """
         if self.mean_ax is None:
             self.mean_ax = self.fig.add_subplot(2, 2, 2)
@@ -149,7 +137,8 @@ class Graphics:
 
     def animal_dist_graphs(self):
         """
-        Creates the graphs for herbivore and carnivore distribution
+        Creates the distribution graphs for herbivore and
+        carnivore distribution
         """
         if self.herbivore_dist is None:
             self.herbivore_dist = self.fig.add_subplot(2, 2, 3)
@@ -161,9 +150,7 @@ class Graphics:
 
     def update_herbivore_dist(self, distribution):
         """
-        Updates herbivore distribution in (2, 2, 3)
-        :param distribution:
-        :return:
+        Updates herbivore distribution in subplot (2, 2, 3)
         """
         if self.herbivore_image_axis is not None:
             self.herbivore_image_axis.set_data(distribution)
@@ -180,9 +167,7 @@ class Graphics:
 
     def update_carnivore_dist(self, distribution):
         """
-        updates Carnivore distribution
-        :param distribution:
-        :return:
+        updates Carnivore distribution subplot (2, 2, 4)
         """
         if self.carnivore_image_axis is not None:
             self.carnivore_image_axis.set_data(distribution)
