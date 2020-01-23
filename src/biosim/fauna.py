@@ -118,6 +118,7 @@ class Fauna:
             self.weight -= offspring.weight * offspring.parameters['xi']
         self.gives_birth = True
 
+    @property
     def probability_of_death(self):
         """
         Death probability depends on the fitness of the animal

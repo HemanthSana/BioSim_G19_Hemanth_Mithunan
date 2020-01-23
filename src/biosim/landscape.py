@@ -214,7 +214,7 @@ class Landscape:
         """
         for species, animals in self.fauna_list.items():
             for animal in animals:
-                if animal.probability_of_death():
+                if animal.probability_of_death:
                     self.remove_animal(animal)
 
     def animal_migrates(self, adj_cells):
@@ -265,18 +265,24 @@ class Landscape:
 
     @property
     def total_herb_weight(self):
+        """
+        Returns the total herbivore weight
+        """
         return sum(herb.weight for herb in self.fauna_list['Herbivore'])
 
     @property
     def remaining_food(self):
+        """
+        Gives remaining food for animals according to cells
+        """
         if isinstance(self, (Ocean, Mountain)):
             raise ValueError('There are no fodder available in this cell')
         elif isinstance(self, Desert):
             self._remaining_food = {'Herbivore': 0,
-                                   'Carnivore': self.total_herb_weight}
+                                    'Carnivore': self.total_herb_weight}
         else:
             self._remaining_food = {'Herbivore': self.parameters['f_max'],
-                                   'Carnivore': self.total_herb_weight}
+                                    'Carnivore': self.total_herb_weight}
         return self._remaining_food
 
 
