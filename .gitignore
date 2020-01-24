@@ -225,3 +225,5 @@ dmypy.json
 doc/_build/html/
 
 doc/_build/doctrees/
+
+doc/_build/latex/
