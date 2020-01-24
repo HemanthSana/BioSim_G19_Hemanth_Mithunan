@@ -46,7 +46,6 @@ class Fauna:
         """
         Calculates the increase in animal weight according to the food eaten
         :param fodder_eaten: Amount of fodder ate by animal in a year
-        :return: amount of increase in weight
         """
         self.weight += self.parameters['beta'] * fodder_eaten
 
@@ -54,7 +53,6 @@ class Fauna:
         """
         Every year weight of animal decreases by certain factor
         :param const: factor by which weight decreases every year(eta)
-        :return: Reduced weight
         """
         self.weight -= const * self.weight
 
@@ -69,7 +67,6 @@ class Fauna:
         """
         Increases animal weight according to food eaten
         :param food_eaten: amount of food depends on species
-        :return: increased weight
         """
         self.increase_animal_weight(food_eaten)
 
@@ -80,7 +77,6 @@ class Fauna:
         It is calculated by the formula given in instructions
         Phi = q(-1, a, a_half, phi_age)*q(+1, w, w_half, phi_weight)
         Uses parameters phi_age, a_half, phi_weight, w_half to calculate
-        :return: fitness value
         """
         if self.weight > 0:
             q_age = 1 / (1 + math.exp(self.parameters['phi_age'] *
@@ -98,7 +94,6 @@ class Fauna:
         It should be calculated only if atleast 2 animals of same species are
         in cell
         :param num_animals: Number of animals of same species in cell
-        :return: Bool
         """
         if num_animals >= 2 and self.weight >= self.parameters['zeta'] * \
                 (self.parameters['w_birth'] + self.parameters['sigma_birth']):
@@ -112,7 +107,6 @@ class Fauna:
         """
         Weight of the animal decreases xi times the weight of offspring
         :param offspring: object either Herbivore or Carnivore
-        :return: decreased weight after birth
         """
         if self.weight > offspring.weight * offspring.parameters['xi']:
             self.weight -= offspring.weight * offspring.parameters['xi']
@@ -123,7 +117,6 @@ class Fauna:
         """
         Death probability depends on the fitness of the animal
         If the fitness is 0 probability is 1
-        :return: a floating point value
         """
         if self.animal_fitness == 0:
             return False
@@ -134,8 +127,7 @@ class Fauna:
     @property
     def probability_of_move(self):
         """
-
-        :return: probability value in floating point
+        To know if animal moves
         """
         return np.random.random() < self.parameters['mu'] * self.animal_fitness
 

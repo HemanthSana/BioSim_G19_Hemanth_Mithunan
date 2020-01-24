@@ -48,7 +48,6 @@ class Island:
     def string_to_array(self):
         """
         This is to get a numpy array from the given multidimensional string
-        :return: Numpy array
         """
         map_str_clean = self.map.replace(' ', '')
         char_map = np.array(
@@ -60,7 +59,6 @@ class Island:
         """
         Gets the edges of the Map
         :param map_array: array
-        :return: Edges of the map
         """
         rows, cols = map_array.shape[0], map_array.shape[1]
         map_edges = [map_array[0, :cols], map_array[rows - 1, :cols],
@@ -71,7 +69,6 @@ class Island:
         """
         To check if the edge cells are only ocean
         :param map_array: island_map
-        :return: Value error if edge is not Ocean
         """
         edges = self.edges(map_array)
         for edge in edges:
@@ -114,7 +111,7 @@ class Island:
     def add_animals(self, pop):
         """
         This is to add animals to the cells
-        :param pop: Number of animals
+        :param pop: Number of animals to add
         """
         for animal_group in pop:
             loc = animal_group['loc']
@@ -131,8 +128,7 @@ class Island:
     def total_animals_per_species(self, species):
         """
         To get total number of Herbivores and Carnivores in all cells
-        :param species: Str i.e, Herbivore or Carnivore
-        :return:Number of animals
+        :param species: Herbivore or Carnivore object
         """
         num_animals = 0
         rows, cols = self.map_dims

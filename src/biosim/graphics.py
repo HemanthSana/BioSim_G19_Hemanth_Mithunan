@@ -181,6 +181,5 @@ class Graphics:
     def set_year(self, year):
         """
         Set the year on the Figure
-        :param year:
         """
-        self.fig.suptitle('Year: ' + str(year), x=0.5)
+        self.fig.suptitle('Graphics for Year: ' + str(year), x=0.5)

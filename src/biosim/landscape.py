@@ -32,9 +32,6 @@ class Landscape:
     def save_fitness(self, animals, species):
         """
         Updates fitness value
-        :param animals: dictionary
-        :param species: Herbivore or Carnivore
-        :return: fitness value
         """
         animal_fitness = {}
         for animal in animals[species]:
@@ -55,8 +52,6 @@ class Landscape:
         """
         Returns relevant food remaining in cell (f_k)
         This is different for Carnivores and Herbivores
-        :param animal: Fauna object
-        :return: amount of food available
         """
         species = animal.__class__.__name__
         return self.remaining_food[species]
@@ -64,8 +59,6 @@ class Landscape:
     def add_animal(self, animal):
         """
         Adds animal(object) to the species list of cell
-        :param animal: class object
-        :return: appends animal to list
         """
         species = animal.__class__.__name__
         self.fauna_list[species].append(animal)
@@ -73,8 +66,6 @@ class Landscape:
     def remove_animal(self, animal):
         """
         Removes animal(object) from list of same species for cell
-        :param animal: class object
-        :return: removes animal from list
         """
         species = animal.__class__.__name__
         self.fauna_list[species].remove(animal)
@@ -83,9 +74,6 @@ class Landscape:
         """
         Calculates "Relative Abundance of Fodder" (E_k) by relevant fodder,
         number of animals of same species and the F
-
-        :param animal: class object
-        :return: value of relative fodder abundance
         """
         species = animal.__class__.__name__
         return self.relevant_food(animal) / (
@@ -95,8 +83,6 @@ class Landscape:
         """
         Returns Propensity to move from a cell to adjacent cell
         If the adjacent cell is Mountain or Landscape it returns 0
-        :param animal: class object
-        :return: calculated value
         """
         if isinstance(self, Mountain) or isinstance(self, Ocean):
             return 0
@@ -107,9 +93,6 @@ class Landscape:
     def probability_move_to_cell(self, animal, total_propensity):
         """
         Calculates the probability to move from one cell to another
-        :param animal: class object
-        :param total_propensity: calculated value of total propensity
-        :return: floating point value of move probability
         """
         return self.propensity_to_move(animal) / total_propensity
 
@@ -132,7 +115,6 @@ class Landscape:
         remaining fodder in cell
         if fodder available is less than food required animal eates
         available food. And update remaining fodder as 0
-        :return:
         """
         self.order_by_fitness()
         for herb in self.fauna_list['Herbivore']:
@@ -152,7 +134,6 @@ class Landscape:
         fitness will be eaten first.
         if there is enough weight for carnivore to eat it eats the
         required food F, Else it eats food equal to weight of herbivores
-        :return:
         """
         self.order_by_fitness()
         for carn in self.fauna_list['Carnivore']:
@@ -174,12 +155,14 @@ class Landscape:
             self.fauna_list['Herbivore'] = not_eaten_animals
 
     def update_fodder(self):
+        """
+        Method to update fodder in cells. Overridden in Jungle and Savannah
+        """
         pass
 
     def update_animal_weight_age(self):
         """
         Each year animal increases in age by 1 and loses weight by factor eta
-        :return:
         """
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
@@ -190,7 +173,6 @@ class Landscape:
         Compare the probability_of_birth with random value generated
         If its greater animal gives birth. Create offspring of same species
         and decrease weight of animal
-        :return:
         """
         for species, animals in self.new_fauna_list.items():
             for i in range(math.floor(len(self.new_fauna_list[species])/2)):
@@ -224,11 +206,10 @@ class Landscape:
 
     def animal_migrates(self, adj_cells):
         """
-        We calculate the probability as propensity/sum of prpensity
+        We calculate the probability as propensity/sum of propensity
         for each adj cells. Animal migrates to the cell with highest
         probability to move. We add the animal to the newly moved cell and
         remove it from old cell.
-        :param adj_cells: List of 4 immediate adjacent cells
         """
         for species, animals in self.fauna_list.items():
             for animal in animals:
@@ -252,7 +233,6 @@ class Landscape:
     def grow_all_animals(self):
         """
         Growing all animals
-        :return:
         """
         for species in self.fauna_list:
             for animal in self.fauna_list[species]:
@@ -262,7 +242,6 @@ class Landscape:
     def cell_fauna_count(self):
         """
         Returns count of fauna type as dictionary
-        :return: dict
         """
         herb_count = len(self.fauna_list['Herbivore'])
         carn_count = len(self.fauna_list['Carnivore'])
@@ -359,7 +338,6 @@ class Savannah(Landscape):
         Updates the fodder available in Savannah cells. Available fodder is
         calculated by formula  available fodder = available fodder +
         alpha(f_max - available fodder)
-        :return:
         """
         self.remaining_food['Herbivore'] += self.parameters['alpha'] * (
                 self.parameters['f_max'] - self.remaining_food['Herbivore'])
