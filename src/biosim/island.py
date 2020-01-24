@@ -144,6 +144,7 @@ class Island:
         this should be called every year
         """
         print('New Year')
+        self.reset_migration_flag()
         rows, cols = self.map_dims
         for row in range(rows):
             for col in range(cols):
@@ -155,3 +156,9 @@ class Island:
                         self.adjacent_cells(row, col))
                     self._cells[row, col].grow_all_animals()
                     self._cells[row, col].animal_dies()
+
+    def reset_migration_flag(self):
+        rows, cols = self.map_dims
+        for row in range(rows):
+            for col in range(cols):
+                self._cells[row, col].reset_migration_flag()

@@ -227,8 +227,10 @@ class Landscape:
                             i += 1
                         cell_to_migrate = adj_cells[i]
                         if cell_to_migrate.is_migratable:
-                            cell_to_migrate.add_animal(animal)
-                            self.remove_animal(animal)
+                            if animal.is_animal_moved_already is False:
+                                cell_to_migrate.add_animal(animal)
+                                self.remove_animal(animal)
+                                animal.is_animal_moved_already = True
 
     def grow_all_animals(self):
         """
@@ -268,6 +270,11 @@ class Landscape:
             self._remaining_food = {'Herbivore': self.parameters['f_max'],
                                     'Carnivore': self.total_herb_weight}
         return self._remaining_food
+
+    def reset_migration_flag(self):
+        for species, animals in self.fauna_list.items():
+            for animal in animals:
+                animal.is_animal_moved_already = False
 
 
 class Jungle(Landscape):
