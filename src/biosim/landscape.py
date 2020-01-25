@@ -267,8 +267,9 @@ class Landscape:
             self._remaining_food = {'Herbivore': 0,
                                     'Carnivore': self.total_herb_weight}
         else:
-            self._remaining_food = {'Herbivore': self.parameters['f_max'],
-                                    'Carnivore': self.total_herb_weight}
+            self._remaining_food = {
+                'Herbivore': self._remaining_food['Herbivore'],
+                'Carnivore': self.total_herb_weight}
         return self._remaining_food
 
     def reset_migration_flag(self):
