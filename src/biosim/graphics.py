@@ -155,10 +155,10 @@ class Graphics:
             self.herbivore_dist.imshow(distribution,
                                        interpolation='nearest',
                                        vmin=0, vmax=5)
-            self.herbivore_dist.set_xticks(range(0, x, 5))
-            self.herbivore_dist.set_xticklabels(range(1, x + 1, 5))
-            self.herbivore_dist.set_yticks(range(0, y, 5))
-            self.herbivore_dist.set_yticklabels(range(1, y + 1, 5))
+            # self.herbivore_dist.set_xticks(range(0, x, 5))
+            # self.herbivore_dist.set_xticklabels(range(1, x + 1, 5))
+            # self.herbivore_dist.set_yticks(range(0, y, 5))
+            # self.herbivore_dist.set_yticklabels(range(1, y + 1, 5))
             self.herbivore_dist.set_title('Herbivore Distribution')
 
     def update_carnivore_dist(self, distribution):
@@ -172,10 +172,10 @@ class Graphics:
             self.carnivore_dist.imshow(distribution,
                                        interpolation='nearest',
                                        vmin=0, vmax=5)
-            self.carnivore_dist.set_xticks(range(0, x, 5))
-            self.carnivore_dist.set_xticklabels(range(1, 1 + x, 5))
-            self.carnivore_dist.set_yticks(range(0, y, 5))
-            self.carnivore_dist.set_yticklabels(range(1, 1 + y, 5))
+            # self.carnivore_dist.set_xticks(range(0, x, 5))
+            # self.carnivore_dist.set_xticklabels(range(1, 1 + x, 5))
+            # self.carnivore_dist.set_yticks(range(0, y, 5))
+            # self.carnivore_dist.set_yticklabels(range(1, 1 + y, 5))
             self.carnivore_dist.set_title('Carnivore Distribution')
 
     def set_year(self, year):
